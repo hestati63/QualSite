@@ -3,7 +3,12 @@
     text-align: center;
 }
 
-a {color: #000}
+nav 
+{
+    background-color: #81c784;
+}
+
+a {color: #000;}
 
 i.material-icons { float: left; }
 h3 { display: inline-block; line-height:  60px; }

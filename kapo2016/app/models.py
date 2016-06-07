@@ -19,15 +19,15 @@ class User(Base):
     is_admin = Column(Boolean, unique = False)
     is_open_able = Column(Integer, unique = False)
 
-    def __init__(self, userid=None, passwd=None, name=None, _type = None):
+    def __init__(self, userid=None, passwd=None, name=None, _type = 0):
         self.userid = userid
         self.set_password(passwd)
         self.name = name
 
         self.solved = 0
-        self._type = 0
-        self.last_auth_success = 0
-        self.last_auth_failed = 0
+        self._type = _type
+        self.last_auth_success = None
+        self.last_auth_failed = None
         self.is_admin = False
         self.is_open_able = 0
 
@@ -66,15 +66,16 @@ class Problem(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(32), unique = False)
     description = Column(String(512), unique = False)
+    fb = Column(String(512), unique = False)
     solver = Column(Integer, unique = False)
     is_open = Column(Boolean, unique = False)
 
     def __init__(self, name, desc):
         self.name = name
-        self.desc = desc
+        self.description = desc
         self.solver = 0
         self.is_open = False
-        self.socres = 0
+        self.scores = 0
 
     def score(self):
         self.scores = int(score_max * math.log(1.1 * user_num / (self.solver + 1)) / math.log(1.1 * user_num / 2))

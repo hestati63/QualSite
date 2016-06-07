@@ -1,35 +1,49 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="row" style="padding-top: 24px">
-  <div class="col offset-s2 s8">
-  {% for problem in pr %}
+  <div class="col offset-s2 s4">
+    <h5> Problems </h5>
+    {% for problem in pr %}
     {% if problem.is_open %}
     <span>
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
         {% if problem.solver == 0 %}
         <span class="burning">
           <i class="tiny material-icons">star</i>
-        {% else %}
-         <span>
-          <i class="tiny material-icons">label</i>
+          {% else %}
+          <span>
+            <i class="tiny material-icons">label</i>
 
-        {% endif %}
-        {{ problem.name }}({{ problem.solver }})
-      </a>
-  </span>
-  {{ problem.scores }}</span>
-    {% else %}
-      {% if True %}
+            {% endif %}
+            {{ problem.name }}({{ problem.solver }})
+          </a>
+        </span>
+        {{ problem.scores }}</span>
+      {% else %}
+      {% if session.user and not session.user.is_open_able %}
       <span><i class="tiny material-icons">lock</i>Locked</span>
       {% else %}
       <a href="{{url_for('frontend.open', _id = problem.id) }}">
         <span><i class="tiny material-icons">vpn_key</i>Locked</span>
       </a>
       {% endif %}
-    {% endif %}
-    <br>
-  {% endfor %}
+      {% endif %}
+      <br>
+      {% endfor %}
+    </div>
+    <div class="col s4">
+      <h5 class="center"> Scoreboard </h5>
+      <div class="row">
+        <div class="col s12">
+          <ul class="tabs">
+            <li class="tab col s6"><a class="active"href="#15">15&#8593</a></li>
+            <li class="tab col s6"><a href="#16">16</a></li>
+          </ul>
+        </div>
+        <div id="15" class="col s12">Test 1</div>
+        <div id="16" class="col s12">Test 2</div>
+      </div>
+    </div>
   </div>
-</div>
 
 {% endblock %}

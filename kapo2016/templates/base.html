@@ -2,12 +2,11 @@
 <html>
   <head>
     <title> GoN Kapo Qual </title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/materialize.css') }}">
+    <link rel=stylesheet type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.css">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/qual.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.png') }}"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.14.0/jquery.validate.js"></script>
     <script src="{{ url_for('static', filename='js/materialize.js') }}"></script>
   </head>
   <body style="background-color:#e0e0e0">
@@ -15,15 +14,22 @@
       <div class="nav-wrapper">
         <ul id="nav-mobile" class="left hide-on-med-and-down">
           <li><a href="{{ url_for('frontend.main') }}">GoN</a></li>
-          <li><a href="{{ url_for('frontend.mypage') }}">Mypage</a></li>
+          {% if session.is_login %}
+          <li><a href="{{ url_for('frontend.mypage') }}">{{ session.user.userid }} </a></li>
+          {% endif %}
         </ul>
 
         <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li><a href="{{ url_for('frontend.rule') }}">Rule</a></li>
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
-          <li><a href="{{ url_for('frontend.score') }}">Score</a></li>
-
+          {% if session.user and session.user.is_admin %}
+          <li><a href="{{ url_for('frontend.score') }}">Admin</a></li>
+          {% endif %}
+          {% if session.is_login %}
+          <li><a href="{{ url_for('frontend.logout') }}">Logout</a></li>
+          {% else %}
           <li><a href="{{ url_for('frontend.login') }}">Login</a></li>
+          {% endif %}
 
         </ul>
       </div>
@@ -33,6 +39,11 @@
       {% endblock %}
     </main>
   </body>
+  <script>
+    {% if msg %}
+    Materialize.toast("{{ msg }}", 4000);
+    {% endif %}
+  </script>
       {% block script %}
       {% endblock %}
 </html>

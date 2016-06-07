@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8" style="padding-left:24px">
+      <span><h4 {% if problem.solver == 0 %} class="burning" {% endif %} style="display: inline-block"> {{ problem.name }} </h4> 
+      <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">{{ problem.scores }}</div>
+    <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">solver: {{ problem.solver }}</div></span>
+<hr></hr>
+<div style="padding: 24px 24px 24px 24px;">
+  {{ problem.description | safe}}
+</div>
+    <hr></hr>
+    <form class="col s12" method="post" style="display: inline-block">
+      <div class="row">
+        <div class="input-field col s9">
+          <input placeholder="flag" name="flag" type="text" class="validate">
+        </div>
+        <div class="col s3" style="display: inline-block">
+        <button class="btn waves-effect waves-light" type="submit"  value="Submit">Submit
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

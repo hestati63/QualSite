@@ -13,7 +13,19 @@ Base.query = db_session.query_property()
 def init_db():
         import models
         Base.metadata.create_all(bind=engine)
-        for i in xrange(16):
-            t = models.Problem(str(i), "AAAA")
+        if True:
+            t = models.User("admin", "admin", "admin", 1)
             db_session.add(t)
             db_session.commit()
+        if False:
+            for i in xrange(16):
+                t = models.Problem("prob" + str(i), "AAAA")
+                if i == 0: 
+                    t.is_open = True
+                    t.solver = 1
+                elif i == 1:
+                    t.is_open = True
+
+
+                db_session.add(t)
+                db_session.commit()

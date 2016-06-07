@@ -2,7 +2,7 @@
 from flask import Flask, render_template, abort, request, session, flash, url_for, redirect, Blueprint
 from flask.ext.session import Session
 import models
-import databases
+from databases import db_session
 import config
 from datetime import datetime
 from time import time, mktime
@@ -17,11 +17,8 @@ def main():
     if not debug and  start > 0:
         return render_template("count.html", left = start)
 
-    if 'uid' in session.keys():
-        problems = models.Problem.query.filter_by(is_open = True).filter_by(solver = 0).all()
-        return render_template('logined_main.html', pr = problems)
-    else:
-        return render_template('base.html')
+    problems = models.Problem.query.filter_by(is_open = True).filter_by(solver = 0).all()
+    return render_template('main.html', pr = problems)
 
 @frontend.route("/rule")
 def rule():
@@ -37,9 +34,24 @@ def prob():
 def score():
     pass
 
-@frontend.route("/login")
+@frontend.route("/login", methods=["GET", "POST"])
 def login():
-    pass
+    msg = None
+    if request.method == "POST":
+        c_user = models.User.query.filter_by(userid=request.form['username']).first()
+        if c_user and c_user.check_password(request.form['pw']):
+            session['is_login'] = True
+            session['user'] = c_user
+            return redirect(url_for('frontend.main'))
+        else:
+            msg = 'Login fail'
+    return render_template("login.html", msg = msg)
+
+@frontend.route("/logout")
+def logout():
+    session['is_login'] = False
+    session.user = None
+    return redirect(url_for("frontend.main"))
 
 @frontend.route("/mypage")
 def mypage():
@@ -47,8 +59,20 @@ def mypage():
 
 @frontend.route("/show/<int:_id>")
 def show(_id):
-    return "!!"
+    problem = models.Problem.query.filter_by(id=_id).first()
+    if not problem.is_open:
+        return redirect(url_for("frontend.prob"))
+    problem.score()
+    return render_template("show_prob.html", problem = problem)
 
 @frontend.route("/open/<int:_id>")
 def open(_id):
-    return "!!"
+    problem = models.Problem.query.filter_by(id=_id).first()
+
+    if not session['user'].is_admin and problem.is_open or session['user'].is_open_able <= 0:
+        return redirect(url_for("frontend.prob"))
+
+    problem.is_open = True
+    session['user'].is_open_able -= 1
+    db_session.commit()
+    return redirect(url_for("frontend.prob"))
