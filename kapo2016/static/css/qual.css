@@ -1,0 +1,79 @@
+.Container
+{
+    text-align: center;
+}
+
+a {color: #000}
+
+i.material-icons { float: left; }
+h3 { display: inline-block; line-height:  60px; }
+h3.valign:after { content: ""; display: block; clear: both; }
+
+.burning {
+  color: #fff;
+  text-shadow: 0px -1px 4px white, 0px -2px 10px yellow, 0px -10px 20px #ff8000, 0px -18px 40px red;
+}
+
+.Container:before
+{
+    content: '';
+    height: 100%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.Content
+{
+    display: inline-block;
+    vertical-align: middle;
+}
+
+body {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+label {
+  width: 100%;
+}
+
+.input-field label {
+  font-size: 0.8rem;
+  -webkit-transform: translateY(-140%);
+  -moz-transform: translateY(-140%);
+  -ms-transform: translateY(-140%);
+  -o-transform: translateY(-139%);
+  transform: translateY(-140%);
+}
+
+
+blockquote {
+  background-color: #ffffff
+}
+
+.collapsible-header {
+  font-size: 1vw;
+}
+.collapsible-body {
+  word-wrap: break-word;
+}
+
+
+
+.btn-icon {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #fff;
+  border-radius: 100%;
+  text-align: center;
+  font-size: 10px;
+  line-height: 25px;
+}

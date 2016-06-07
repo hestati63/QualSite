@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5>Notice</h5>
+    <table class="striped">
+      <thead>
+        <tr>
+          <td> Rules </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td> 1. aaaa </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5 class="burning">Hot Stuff!!!</h5>
+    <div class="row">
+      {% for problem in pr %}
+      <div class="col s4 m6">
+        <div class="card-panel">
+          <span>
+            <a href="{{ url_for('frontend.show', _id=problem.id) }}">
+              {{ problem.name }}
+            </a>
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5>ScoreBoard</h5>
+  <div>
+</div>
+
+
+{% endblock %}
