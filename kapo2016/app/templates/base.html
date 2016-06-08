@@ -30,7 +30,7 @@
           <li><a href="{{ url_for('frontend.mypage') }}">{{ current_user.userid }} </a></li>
           <li><a href="{{ url_for('frontend.logout') }}">Logout</a></li>
           {% else %}
-          <li><a href="{{ url_for('frontend.mypage') }}">Sign Up</a></li>
+          <li><a href="{{ url_for('frontend.signup') }}">Sign Up</a></li>
           <li><a href="{{ url_for('frontend.login') }}">Sign In</a></li>
           {% endif %}
         </ul>

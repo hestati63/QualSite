@@ -83,6 +83,41 @@ def logout():
     logout_user()
     return redirect(url_for("frontend.main"))
 
+@frontend.route("/signup", methods=["GET", "POST"])
+def signup():
+    msg = ""
+    try:
+        if request.method == "POST":
+            username = request.form['username']
+            pw = request.form['pw']
+            pwchk = request.form['pwchk']
+            name = request.form['name']
+            eyear = request.form['eyear']
+            if not eyear in ["0", "1"]:
+                msg = "no Troll"
+            elif not all(map(lambda x: x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_', username)):
+                msg = "Not allowed character in id"
+            elif len(pw) < 5:
+                msg = "password should be longer than 5 letters"
+            elif pw == pwchk:
+                if config.registkey == request.form['regkey']:
+                    chk = User.query.filter_by(userid = username).first()
+                    if chk:
+                        msg = "user already exists"
+                    else:
+                        user = User(username, pw, name, eyear)
+                        db_session.add(user)
+                        db_session.commit()
+                        return redirect(url_for("frontend.login"))
+                else:
+                    msg = "wrong regist key"
+            else:
+                msg = "password and password check is differ"
+    except:
+        msg = "empty field"
+
+    return render_template("signup.html", msg = msg)
+
 @frontend.route("/mypage")
 @login_required
 def mypage():
@@ -103,12 +138,13 @@ def show(_id):
     msg = ""
     if request.method == "POST" and 'flag' in request.form.keys():
         if problem.check_flag(request.form['flag']):
+            msg = "Good!"
             if problem.solver == 0:
                 notice = Notice("Wow! <a href=\"%s\">%s</a> <span class=\"red-text\">break</span> <a href=\"%s\"><b>[%s]</b>%s</a>!!!!" %(url_for('frontend.show_user', _id=current_user.id), current_user.userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name))
                 db_session.add(notice)
                 db_session.commit()
+                msg = "U got Breakthrough!!! Plz open new problem!!!"
             problem.add_solver(current_user)
-            msg = "Good!"
         else:
             msg = "Wrong!"
 

@@ -3,7 +3,7 @@ SECRET = '\x121\x11\xccRBv\x1e\xa1\xa7\xf36\xa5\x17Q\xfc \xc3\xf79\xa7\xa7\xa6Re
 dbfile = './tmp.db'
 
 category = ["Pwnable", "Reversing", "Webhacking", "Forensic", "Coding"]
-psize = 16
 score_max = 600
 user_num = 40
 
+registkey = "a"
