@@ -18,6 +18,18 @@ class Notice(Base):
     def __repr__(self):
         return "<post: %d>" % (self.id)
 
+class Rule(Base):
+    __tablename__ = "Rule"
+    id = Column(Integer, primary_key = True)
+    body = Column(String(512), unique = False)
+
+    def __init__(self, body):
+        self.body = body
+
+    def __repr__(self):
+        return "<rule: %d>" % (self.id)
+
+
 class User(Base):
     __tablename__ = 'User'
     id = Column(Integer, primary_key = True)

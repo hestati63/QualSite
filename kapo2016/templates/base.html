@@ -20,7 +20,7 @@
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
           <li><a href="{{ url_for('frontend.notice') }}">Notice</a></li>
           {% if session.user and session.user.is_admin %}
-          <li><a href="{{ url_for('frontend.score') }}">Admin</a></li>
+          <li><a href="{{ url_for('frontend.refill') }}">Open Problem</a></li>
           {% endif %}
         </ul>
 

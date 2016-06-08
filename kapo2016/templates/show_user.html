@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8" style="padding-left:24px">
+    <div class="col offset-s1 s11">
+      <span><h4 style="display: inline-block"> {{ user.userid }} </h4> 
+
+        <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> Rank: 1</div>
+      </span>
+    </div>
+    <hr></hr>
+    <div style="padding: 12px 24px 0 24px">
+      <div class="row">
+        <div class="col s2">
+          <b class="right">name</b><br>
+          <b class="right">last_auth_failed</b><br>
+          <b class="right">last_auth_successed</b><br>
+          <b class="right">Score</b><br>
+        </div>
+        <div class="col s8">
+          {{ user.name }}<br>
+        </div>
+      </div>
+    </div>
+    <hr></hr>
+    <div class="row" style="padding: 12px 24px 12px 24px;">
+      <div class="col s2">
+        <h5 class="right"> <b>Solved</b> </h5>
+        <!-- solved problem will locate here -->
+      </div>
+      <div class="col s10"></div>
+    </div>
+    <hr></hr>
+  </div>
+</div>
+</div>
+
+{% endblock %}

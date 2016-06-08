@@ -7,7 +7,11 @@
       <tbody>
         {% for notice in notices %}
         <tr>
-          <td style="background-color:#fff"> <div class="col s1">{{ notice.id }} </div><div class="col s8"><span class="center">{{ notice.body }}</span></div><div class="col s3"> {{ (notice.upload | string)[:19]}}</div></td>
+          <td style="background-color:#fff">
+            <div class="col s1"> {{ notice.id }} </div>
+            <div class="col s8"><span class="center">{{ notice.body | safe }}</span></div>
+            <div class="col s3"> {{ (notice.upload | string)[:19]}}</div>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

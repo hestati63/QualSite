@@ -14,8 +14,9 @@ debug = True
 
 @frontend.route("/refill")
 def refill():
-    session['user'].is_open_able += 1
-    return redirect(url_for("frontend.main"))
+    if session['user'].is_admin:
+        session['user'].is_open_able += 1
+    return redirect(url_for("frontend.prob"))
 
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
@@ -35,7 +36,7 @@ def notice():
 
 @frontend.route("/rule")
 def rule():
-    return render_template("rule.html")
+    return render_template("rule.html", rules = models.Rule.query.all())
 
 @frontend.route("/prob")
 def prob():
@@ -78,6 +79,13 @@ def logout():
 def mypage():
     pass
 
+@frontend.route("/user/<int:_id>")
+def show_user(_id):
+    user = models.User.query.filter_by(id=_id).first()
+    if not user:
+        return redirect(url_for('frontend.main'))
+    return render_template('show_user.html', user = user)
+
 @frontend.route("/show/<int:_id>")
 def show(_id):
     problem = models.Problem.query.filter_by(id=_id).first()
@@ -95,5 +103,12 @@ def open(_id):
 
     problem.is_open = True
     session['user'].is_open_able -= 1
+
+    if not session['user'].is_admin:
+        notice = models.Notice("<a href=\"%s\">%s</a> open <a href=\"%s\"><b>[%s]</b>%s</a>!" %(url_for('frontend.show_user', _id=session['user'].id), session['user'].userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+    else:
+        notice = models.Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+    db_session.add(notice)
     db_session.commit()
+
     return redirect(url_for("frontend.prob"))
