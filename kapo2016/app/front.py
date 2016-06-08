@@ -61,10 +61,6 @@ def prob():
 
     return render_template("prob.html", pr = prs, categories = config.category)
 
-@frontend.route("/score")
-def score():
-    pass
-
 @frontend.route("/login", methods=["GET", "POST"])
 def login():
     msg = None
@@ -118,10 +114,41 @@ def signup():
 
     return render_template("signup.html", msg = msg)
 
-@frontend.route("/mypage")
+@frontend.route("/admin")
+@login_required
+def admin():
+    if not current_user.is_admin: return redirect(url_for("frontend.main"))
+    return render_template("admin.html")
+
+@frontend.route("/mypage", methods=["POST", "GET"])
 @login_required
 def mypage():
-    pass
+    if current_user.is_admin:
+        return redirect(url_for("frontend.admin"))
+    else:
+        msg = ""
+        try:
+            if request.method == "POST":
+                cpw = request.form['cpw']
+                pw = request.form['pw']
+                pwchk = request.form['pwchk']
+                name = request.form['name']
+                if current_user.check_password(cpw):
+                    if len(pw) < 5:
+                        msg = "password should be longer than 5 letters"
+                    elif pw == pwchk:
+                        current_user.name = name
+                        current_user.set_password(pw)
+                        db_session.commit()
+                        msg = "data successfully update"
+                    else:
+                        msg = "password and password check is differ"
+                else:
+                    msg = "wrong current password"
+        except:
+            msg = "something wrong"
+
+        return render_template("mypage.html", msg = msg)
 
 @frontend.route("/user/<int:_id>")
 @login_required

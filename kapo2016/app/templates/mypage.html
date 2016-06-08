@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5 class="center"> Mypage </h5>
+    <div class="row">
+    <h5 class="center" style="font-size: 14px"><a href="{{ url_for('frontend.show_user', _id = current_user.id) }}"> Public Information</a></span>
+     </div>
+    <form class="col offset-s3 s6" method="post">
+      <div class="row">
+        <div class="input-field col s12">
+          <label for="first_name">Username</label>
+          <input disabled name="username" type="text" class="validate" value="{{ current_user.userid }}">
+        </div>
+        <div class="input-field col s12">
+          <input name="cpw" type="password" class="validate">
+          <label for="last_name">Current Password</label>
+        </div>
+
+        <div class="input-field col s12">
+          <input name="pw" type="password" class="validate">
+          <label for="last_name">Password Change</label>
+        </div>
+        <div class="input-field col s12">
+          <input name="pwchk" type="password" class="validate">
+          <label for="last_name">Password Check</label>
+        </div>
+        <div class="input-field col s12">
+          <input name="name" type="text" class="validate" value="{{ current_user.name }}">
+          <label for="last_name">name</label>
+        </div>
+        <div class="input-field col s12">
+          <label for="first_name">entrance year</label>
+          <input disabled name="username" type="text" class="validate" value="{% if current_user._type == '0' %} ~15 {% else %} 16 {% endif %}">
+        </div>
+          <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
