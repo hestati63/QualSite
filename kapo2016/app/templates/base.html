@@ -15,19 +15,19 @@
     <nav>
       <div class="nav-wrapper">
         <ul id="nav-mobile" class="left hide-on-med-and-down">
-          <li><a href="{{ url_for('frontend.main') }}">GoN</a></li>
+          <li><a href="{{ url_for('frontend.main') }}"><i class="material-icons tiny">view_module</i></a></li>
           <li><a href="{{ url_for('frontend.rule') }}">Rule</a></li>
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
           <li><a href="{{ url_for('frontend.notice') }}">Notice</a></li>
-          {% if session.user and session.user.is_admin %}
+          {% if current_user and current_user.is_admin %}
           <li><a href="{{ url_for('frontend.refill') }}">Open Problem</a></li>
           {% endif %}
         </ul>
 
 
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-          {% if session.is_login %}
-          <li><a href="{{ url_for('frontend.mypage') }}">{{ session.user.userid }} </a></li>
+          {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('frontend.mypage') }}">{{ current_user.userid }} </a></li>
           <li><a href="{{ url_for('frontend.logout') }}">Logout</a></li>
           {% else %}
           <li><a href="{{ url_for('frontend.mypage') }}">Sign Up</a></li>
@@ -40,13 +40,22 @@
       {% block body %}
       {% endblock %}
     </main>
+    <footer class="page-footer" style="background-color:#81c784;">
+      <div class="footer-copyright">
+        <div class="container">
+          KAIST Hacking &#x26 Security group GoN, since 1999
+          <div class="right">
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
   <script>
     {% if msg %}
     Materialize.toast("{{ msg }}", 4000);
-    {% endif %}
+{% endif %}
   </script>
-      {% block script %}
-      {% endblock %}
+  {% block script %}
+  {% endblock %}
 </html>
 

@@ -1,8 +1,7 @@
-import datetime
-import math
+import datetime, math
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from werkzeug.security import generate_password_hash, check_password_hash
-from databases import Base
+from databases import Base, db_session
 import config
 
 class Notice(Base):
@@ -64,6 +63,18 @@ class User(Base):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
     def calscore(self, s):
         pass
 
@@ -76,6 +87,8 @@ class Problem(Base):
     fb = Column(String(512), unique = False)
     solver = Column(Integer, unique = False)
     is_open = Column(Boolean, unique = False)
+    is_hot = Column(Boolean, unique = False)
+    openat = Column(DateTime, unique = False)
     dirty = Column(Boolean, unique = False)
     category = Column(String(512), unique = False)
 
@@ -90,6 +103,11 @@ class Problem(Base):
         assert(category in config.category)
         self.category = category
         self.flag = flag
+        self.is_hot = True
+
+    def open(self):
+        self.is_open = True
+        self.openat = datetime.datetime.now()
 
     def __repr__(self):
         return '<Problem: %s>' % (self.name)
@@ -97,9 +115,15 @@ class Problem(Base):
     def check_flag(self, submit):
         return self.flag == submit
 
-    def add_solver(self):
+    def add_solver(self, user):
+        if self.solver == 0:
+            self.fb = user.userid
+        if self.is_hot:
+            self.is_hot = False
+            user.is_open_able += 1
         self.solver += 1
         self.dirty = True
+        db_session.commit()
 
     def update_score(self):
         if self.dirty :

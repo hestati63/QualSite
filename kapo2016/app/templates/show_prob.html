@@ -4,7 +4,7 @@
 <div class="row" style="padding-top:24px">
   <div class="col offset-s2 s8" style="padding-left:24px">
     <div class="col offset-s1 s11">
-    <span><h4 {% if problem.solver == 0 %} class="burning" {% endif %} style="display: inline-block"> {{ problem.name }} </h4> 
+    <span><h4 {% if problem.is_hot %} class="burning" {% endif %} style="display: inline-block"> {{ problem.name }} </h4> 
       <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">{{ problem.scores }}</div>
     </div>
   <hr></hr>
@@ -20,7 +20,7 @@
       {{ problem.category }}<br>
       {% if problem.fb %}{{ problem.fb }}{% endif %}<br>
       {{ problem.solver }}<br>
-      2016-09-01 13:17:21
+      {{ (problem.openat | string)[:19]}} 
     </div>
   </div>
   </div>
@@ -29,13 +29,16 @@
   {{ problem.description | safe}}
 </div>
     <hr></hr>
-    <form class="col s12" method="post" style="display: inline-block">
+    <form class="col s12" method="post" style="display: inline-block; text-align: bottom;vertical-align: baseline;">
       <div class="row">
-        <div class="input-field col s9">
-          <input placeholder="flag" name="flag" type="text" class="validate">
+        <div class="col s2" style="padding-top: 16px;">
+          <label class="right"><h5>I got flag:</h5></label>
+        </div>
+        <div class="input-field col s7">
+          <input placeholder="flag{flag_format_is_like_this}" name="flag" type="text" class="validate">
         </div>
         <div class="col s3" style="display: inline-block">
-        <button class="btn waves-effect waves-light" type="submit"  value="Submit">Submit
+        <button class="btn waves-effect waves-light" type="submit"  value="Submit" style="top: 20px;">Auth
           <i class="material-icons right">send</i>
         </button>
       </div>

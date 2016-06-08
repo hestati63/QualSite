@@ -19,7 +19,7 @@
     <span class="valign">
     {% if problem.is_open %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
-        {% if problem.solver == 0 %}
+        {% if problem.is_hot %}
         <span class="burning">
           <i class="tiny material-icons">star</i>
         {% else %}
@@ -31,7 +31,7 @@
         </a>
         {{ problem.scores }} {% if problem.solver %} <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> {{ problem.fb }} </div>{% endif %}</span>
       {% else %}
-      {% if session.user and not session.user.is_open_able %}
+      {% if current_user and not current_user.is_open_able %}
       <span><i class="tiny material-icons">lock</i>Locked</span>
       {% else %}
       <a href="{{url_for('frontend.open', _id = problem.id) }}">

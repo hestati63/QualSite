@@ -39,20 +39,25 @@ def init_db():
             t = models.User("admin", "admin", "admin", 1)
             t.is_admin = True
             db_session.add(t)
+            t = models.User("guest", "guest", "guest", 1)
+            db_session.add(t)
             db_session.commit()
+
         if True:
             r = config.category
             for i in xrange(16):
                 cate = r[0] if i < 4 else (r[1] if i < 8 else (r[2] if i < 12 else (r[3] if i < 15 else r[4])))
                 t = models.Problem("prob" + str(i), "AAAA", cate, "flag%d"%i)
                 if i == 0: 
-                    t.is_open = True
+                    t.open()
+                    t.is_hot = False
                     t.solver = 1
                     t.fb = "j31d0"
                 elif i == 1:
-                    t.is_open = True
+                    t.open()
                 elif i == 5: 
-                    t.is_open = True
+                    t.open()
+                    t.is_hot = False
                     t.solver = 5
                     t.fb = "lbh"
 
