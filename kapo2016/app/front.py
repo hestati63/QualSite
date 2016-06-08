@@ -29,12 +29,11 @@ def refill():
 
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
-    datetime(2015, 9, 5, 0, 0)
     start = mktime(datetime(2016, 9, 1, 0, 0).timetuple()) - time()
-    if not debug and  start > 0:
+    if not debug and start > 0:
         return render_template("count.html", left = start)
 
-    problems = Problem.query.filter_by(is_open = True).filter_by(solver = 0).all()
+    problems = Problem.query.filter_by(is_open = True).filter_by(is_hot = True).all()
 
     left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
     return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
@@ -114,11 +113,18 @@ def signup():
 
     return render_template("signup.html", msg = msg)
 
-@frontend.route("/admin")
+@frontend.route("/admin", methods=["POST", "GET"])
 @login_required
 def admin():
     if not current_user.is_admin: return redirect(url_for("frontend.main"))
-    return render_template("admin.html")
+    msg = ""
+    if request.method == "POST":
+        notice = Notice(request.form["notice"])
+        db_session.add(notice)
+        db_session.commit()
+        msg = "notice added"
+
+    return render_template("admin.html", msg = msg)
 
 @frontend.route("/mypage", methods=["POST", "GET"])
 @login_required

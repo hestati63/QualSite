@@ -50,16 +50,6 @@ def init_db():
                 t = models.Problem("prob" + str(i), "AAAA", cate, "flag%d"%i)
                 if i == 0: 
                     t.open()
-                    t.is_hot = False
-                    t.solver = 1
-                    t.fb = "j31d0"
-                elif i == 1:
-                    t.open()
-                elif i == 5: 
-                    t.open()
-                    t.is_hot = False
-                    t.solver = 5
-                    t.fb = "lbh"
 
 
                 db_session.add(t)
