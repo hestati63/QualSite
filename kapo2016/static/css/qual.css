@@ -10,7 +10,12 @@ nav
 
 a {color: #000;}
 
-i.material-icons { float: left; }
+i.material-icons 
+{ 
+  float: left; 
+  display: inline-flex;
+  vertical-align: middle;
+}
 h3 { display: inline-block; line-height:  60px; }
 h3.valign:after { content: ""; display: block; clear: both; }
 

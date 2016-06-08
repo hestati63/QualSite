@@ -11,6 +11,11 @@ import string
 frontend = Blueprint('frontend', __name__)
 debug = True
 
+@frontend.route("/refill")
+def refill():
+    session['user'].is_open_able += 1
+    return redirect(url_for("frontend.main"))
+
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
     start = mktime(datetime(2016, 9, 1, 0, 0).timetuple()) - time()
@@ -18,7 +23,10 @@ def main():
         return render_template("count.html", left = start)
 
     problems = models.Problem.query.filter_by(is_open = True).filter_by(solver = 0).all()
-    return render_template('main.html', pr = problems)
+
+    left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
+
+    return render_template('main.html', pr = problems, left = left)
 
 @frontend.route("/rule")
 def rule():
@@ -26,9 +34,17 @@ def rule():
 
 @frontend.route("/prob")
 def prob():
+    if not 'user' in session.keys() or not session['user']: return redirect(url_for("frontend.login"))
     problems = models.Problem.query.all()
-    map(lambda x: x.score(), problems)
-    return render_template("prob.html", pr = problems)
+    map(lambda x: x.update_score(), problems)
+    prs = {}
+    for key in config.category:
+        prs[key] = []
+
+    for i in problems:
+        prs[i.category].append(i)
+
+    return render_template("prob.html", pr = prs, categories = config.category)
 
 @frontend.route("/score")
 def score():
@@ -50,7 +66,7 @@ def login():
 @frontend.route("/logout")
 def logout():
     session['is_login'] = False
-    session.user = None
+    session['user'] = None
     return redirect(url_for("frontend.main"))
 
 @frontend.route("/mypage")
@@ -62,7 +78,7 @@ def show(_id):
     problem = models.Problem.query.filter_by(id=_id).first()
     if not problem.is_open:
         return redirect(url_for("frontend.prob"))
-    problem.score()
+    problem.update_score()
     return render_template("show_prob.html", problem = problem)
 
 @frontend.route("/open/<int:_id>")

@@ -3,7 +3,7 @@ import math
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from werkzeug.security import generate_password_hash, check_password_hash
 from databases import Base
-from config import *
+import config
 
 class User(Base):
     __tablename__ = 'User'
@@ -32,7 +32,7 @@ class User(Base):
         self.is_open_able = 0
 
     def __repr__(self):
-        return '<User %r>' % (self.userid)
+        return '<User: %s>' % (self.userid)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -69,16 +69,27 @@ class Problem(Base):
     fb = Column(String(512), unique = False)
     solver = Column(Integer, unique = False)
     is_open = Column(Boolean, unique = False)
+    dirty = Column(Boolean, unique = False)
+    category = Column(String(512), unique = False)
 
-    def __init__(self, name, desc):
+    def __init__(self, name, desc, category):
         self.name = name
         self.description = desc
         self.solver = 0
         self.is_open = False
         self.scores = 0
+        self.fb = ""
+        self.dirty = True
+        assert(category in config.category)
+        self.category = category
 
-    def score(self):
-        self.scores = int(score_max * math.log(1.1 * user_num / (self.solver + 1)) / math.log(1.1 * user_num / 2))
+    def add_solver(self):
+        self.solver += 1
+        self.dirty = True
+
+    def update_score(self):
+        if self.dirty :
+            self.scores = int(config.score_max * math.log(1.1 * config.user_num / (self.solver + 1)) / math.log(0.55 * config.user_num))
         return self.scores
 
 

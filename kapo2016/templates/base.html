@@ -8,29 +8,30 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script type="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
     <script src="{{ url_for('static', filename='js/materialize.js') }}"></script>
+    {% block css %}
+    {% endblock %}
   </head>
   <body style="background-color:#e0e0e0">
     <nav>
       <div class="nav-wrapper">
         <ul id="nav-mobile" class="left hide-on-med-and-down">
           <li><a href="{{ url_for('frontend.main') }}">GoN</a></li>
-          {% if session.is_login %}
-          <li><a href="{{ url_for('frontend.mypage') }}">{{ session.user.userid }} </a></li>
-          {% endif %}
-        </ul>
-
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
           <li><a href="{{ url_for('frontend.rule') }}">Rule</a></li>
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
           {% if session.user and session.user.is_admin %}
           <li><a href="{{ url_for('frontend.score') }}">Admin</a></li>
           {% endif %}
+        </ul>
+
+
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
           {% if session.is_login %}
+          <li><a href="{{ url_for('frontend.mypage') }}">{{ session.user.userid }} </a></li>
           <li><a href="{{ url_for('frontend.logout') }}">Logout</a></li>
           {% else %}
-          <li><a href="{{ url_for('frontend.login') }}">Login</a></li>
+          <li><a href="{{ url_for('frontend.mypage') }}">Sign Up</a></li>
+          <li><a href="{{ url_for('frontend.login') }}">Sign In</a></li>
           {% endif %}
-
         </ul>
       </div>
     </nav>

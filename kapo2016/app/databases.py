@@ -17,14 +17,20 @@ def init_db():
             t = models.User("admin", "admin", "admin", 1)
             db_session.add(t)
             db_session.commit()
-        if False:
+        if True:
+            r = config.category
             for i in xrange(16):
-                t = models.Problem("prob" + str(i), "AAAA")
+                t = models.Problem("prob" + str(i), "AAAA", r[i % 5])
                 if i == 0: 
                     t.is_open = True
                     t.solver = 1
+                    t.fb = "j31d0"
                 elif i == 1:
                     t.is_open = True
+                elif i == 5: 
+                    t.is_open = True
+                    t.solver = 5
+                    t.fb = "lbh"
 
 
                 db_session.add(t)

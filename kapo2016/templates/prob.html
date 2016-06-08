@@ -1,33 +1,47 @@
 {% extends "base.html" %}
+{% block css %}
+<style>
+  .chip
+  {
+    height: 24px;
+    font-size: 10px;
+    line-height: 22px;
+  }
+</style>
+{% endblock css %}
 {% block body %}
 <div class="row" style="padding-top: 24px">
   <div class="col offset-s2 s4">
     <h5> Problems </h5>
-    {% for problem in pr %}
+    {% for category in categories %}
+    <span><b>{{ category }} </b></span><br>
+    {% for problem in pr[category] %}
+    <span class="valign">
     {% if problem.is_open %}
-    <span>
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
         {% if problem.solver == 0 %}
         <span class="burning">
           <i class="tiny material-icons">star</i>
-          {% else %}
+        {% else %}
           <span>
             <i class="tiny material-icons">label</i>
-
-            {% endif %}
-            {{ problem.name }}({{ problem.solver }})
-          </a>
-        </span>
-        {{ problem.scores }}</span>
+         {% endif %}
+         {{ problem.name }}({{ problem.solver }})
+          </span>
+        </a>
+        {{ problem.scores }} {% if problem.solver %} <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> {{ problem.fb }} </div>{% endif %}</span>
       {% else %}
       {% if session.user and not session.user.is_open_able %}
       <span><i class="tiny material-icons">lock</i>Locked</span>
       {% else %}
       <a href="{{url_for('frontend.open', _id = problem.id) }}">
-        <span><i class="tiny material-icons">vpn_key</i>Locked</span>
+        <span><i class="tiny material-icons">vpn_key</i>open</span>
       </a>
       {% endif %}
       {% endif %}
+      </span>
+      <br>
+      {% endfor %}
       <br>
       {% endfor %}
     </div>
