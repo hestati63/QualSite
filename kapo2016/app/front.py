@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from flask import Flask, render_template, abort, request, session, flash, url_for, redirect, Blueprint
 from flask.ext.session import Session
+from sqlalchemy import desc
 import models
 from databases import db_session
 import config
@@ -26,7 +27,11 @@ def main():
 
     left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
 
-    return render_template('main.html', pr = problems, left = left)
+    return render_template('main.html', pr = problems, left = left, notices = models.Notice.query.order_by(desc(models.Notice.id)).limit(5).all())
+
+@frontend.route("/Notice")
+def notice():
+    return render_template("notice.html", notices = models.Notice.query.order_by(desc(models.Notice.id)).all())
 
 @frontend.route("/rule")
 def rule():

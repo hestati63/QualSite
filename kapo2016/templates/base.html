@@ -18,6 +18,7 @@
           <li><a href="{{ url_for('frontend.main') }}">GoN</a></li>
           <li><a href="{{ url_for('frontend.rule') }}">Rule</a></li>
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
+          <li><a href="{{ url_for('frontend.notice') }}">Notice</a></li>
           {% if session.user and session.user.is_admin %}
           <li><a href="{{ url_for('frontend.score') }}">Admin</a></li>
           {% endif %}

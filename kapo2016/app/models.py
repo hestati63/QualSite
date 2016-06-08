@@ -5,6 +5,19 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from databases import Base
 import config
 
+class Notice(Base):
+    __tablename__ = "Notice"
+    id = Column(Integer, primary_key = True)
+    body = Column(String(512), unique = False)
+    upload = Column(DateTime, unique = False)
+
+    def __init__(self, body):
+        self.body = body
+        self.upload = datetime.datetime.now()
+
+    def __repr__(self):
+        return "<post: %d>" % (self.id)
+
 class User(Base):
     __tablename__ = 'User'
     id = Column(Integer, primary_key = True)
@@ -12,7 +25,6 @@ class User(Base):
     password = Column(String(64), unique = False)
     name = Column(String(32), unique = False)
 
-    solved = Column(Integer, unique = False)
     _type = Column(Integer, unique = False)
     last_auth_success = Column(DateTime, unique = False)
     last_auth_failed  = Column(DateTime, unique = False)
@@ -40,39 +52,22 @@ class User(Base):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def get_solved(self):
-        c_solved = self.solved
-        r = []
-        for i in xrange(psize):
-            r.append((c_solved >> i) & 1)
-        return r
-
-    def solved_list(self):
-        r = []
-        for i in xrange(psize):
-            if ((self.solved >> i) & 1):
-                r.append(i)
-        return r
-
-    def solve(self, s):
-        self.solved |= (1 << s)
-        return self.solved
-
     def calscore(self, s):
         pass
 
 class Problem(Base):
     __tablename__ = 'problems'
     id = Column(Integer, primary_key = True)
-    name = Column(String(32), unique = False)
+    name = Column(String(32), unique = True)
     description = Column(String(512), unique = False)
+    flag = Column(String(512), unique = False)
     fb = Column(String(512), unique = False)
     solver = Column(Integer, unique = False)
     is_open = Column(Boolean, unique = False)
     dirty = Column(Boolean, unique = False)
     category = Column(String(512), unique = False)
 
-    def __init__(self, name, desc, category):
+    def __init__(self, name, desc, category, flag):
         self.name = name
         self.description = desc
         self.solver = 0
@@ -82,6 +77,13 @@ class Problem(Base):
         self.dirty = True
         assert(category in config.category)
         self.category = category
+        self.flag = flag
+
+    def __repr__(self):
+        return '<Problem: %s>' % (self.name)
+
+    def check_flag(self, submit):
+        return self.flag == submit
 
     def add_solver(self):
         self.solver += 1

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="row center" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5>Notice</h5>
+    <table class="centered">
+      <tbody>
+        {% for notice in notices %}
+        <tr>
+          <td style="background-color:#fff"> <div class="col s1">{{ notice.id }} </div><div class="col s8"><span class="center">{{ notice.body }}</span></div><div class="col s3"> {{ (notice.upload | string)[:19]}}</div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+  {% endblock %}
+
