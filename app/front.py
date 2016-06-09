@@ -35,7 +35,7 @@ def main():
     problems = Problem.query.filter_by(is_open = True).filter_by(is_hot = True).all()
 
     left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
-    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).limit(10).all())
+    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
 
 @frontend.route("/Notice")
 def notice():
@@ -57,8 +57,8 @@ def prob():
     for i in problems:
         prs[i.category].append(i)
 
-    U15 = User.query.filter_by(_type = 0).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all()
-    U16 = User.query.filter_by(_type = 1).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all()
+    U15 = User.query.filter_by(_type = 0).order_by(desc(User.score), asc(User.last_auth_success)).all()
+    U16 = User.query.filter_by(_type = 1).order_by(desc(User.score), asc(User.last_auth_success)).all()
     return render_template("prob.html", pr = prs, categories = config.category, U15 = U15, U16 = U16)
 
 @frontend.route("/login", methods=["GET", "POST"])
@@ -173,9 +173,9 @@ def mypage():
 def getrank(user, allrank = False):
     if user.is_admin: return 0
     if allrank:
-        return User.query.filter(User._type != 2).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all().index(user) + 1
+        return User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).all().index(user) + 1
     else:
-        return User.query.filter_by(_type = user._type).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all().index(user) + 1
+        return User.query.filter_by(_type = user._type).order_by(desc(User.score), asc(User.last_auth_success)).all().index(user) + 1
 
 
 @frontend.route("/user/<int:_id>")

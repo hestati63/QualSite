@@ -71,7 +71,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
-              <td>{{ (user.last_auth_time | string)[:19] }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -95,7 +95,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
-              <td>{{ (user.last_auth_time | string)[:19] }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>

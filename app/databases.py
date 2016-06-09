@@ -36,14 +36,19 @@ def init_db():
                 db_session.add(t)
                 db_session.commit()
         if True:
+            import datetime,time
             t = models.User("admin", "admin", "admin", 2)
             t.is_admin = True
+
             db_session.add(t)
             t = models.User("guest", "guest", "guest", 1)
             t.score = 100
+            t.last_auth_success = datetime.datetime.now()
             db_session.add(t)
+            time.sleep(1)
             t = models.User("guest2", "guest", "guest", 1)
-            t.score = 200
+            t.score = 100
+            t.last_auth_success = datetime.datetime.now()
             db_session.add(t)
             t = models.User("guest3", "guest", "guest", 0)
             t.score = 150
