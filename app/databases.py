@@ -58,15 +58,13 @@ def init_db():
 
 def load_from_conf(f):
     import pickle
-    data1 = pickle.load(f)
-    print "ADD %s into Database" % data1
-    db_session.add(data1)
+    data = pickle.load(f)
+    print "ADD %s into Database" % data
+    db_session.add(data)
     db_session.commit()
-
 
 def dump_conf(f, obj):
     import pickle
-
     pickle.dump(obj, f)
 
 

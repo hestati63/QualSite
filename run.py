@@ -1,5 +1,14 @@
 #-*- coding: utf-8 -*-
-from kapo2016 import app, databases
+from flask.ext.session import Session
+from app import *
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+db = databases.engine.connect()
+sess = Session(app)
+del sys
 from sys import argv
 
 if __name__ == "__main__":

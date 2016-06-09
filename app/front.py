@@ -74,6 +74,7 @@ def login():
     return render_template("login.html", msg = msg)
 
 @frontend.route("/logout")
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("frontend.main"))
@@ -118,13 +119,20 @@ def signup():
 def admin():
     if not current_user.is_admin: return redirect(url_for("frontend.main"))
     msg = ""
+    try:
+        cur = request.args['t']
+    except:
+        cur = "notice"
     if request.method == "POST":
-        notice = Notice(request.form["notice"])
-        db_session.add(notice)
-        db_session.commit()
-        msg = "notice added"
+        if cur == 'notice':
+            notice = Notice(request.form["notice"])
+            db_session.add(notice)
+            db_session.commit()
+            msg = "notice added"
+        else:
+            cur = "notice"
 
-    return render_template("admin.html", msg = msg)
+    return render_template("admin.html", msg = msg, cur = cur)
 
 @frontend.route("/mypage", methods=["POST", "GET"])
 @login_required
