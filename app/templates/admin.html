@@ -9,23 +9,23 @@
 {% block body %}
 <div class="row" style="padding-top:24px">
   <div class="col offset-s2 s8">
-  <div class="fixed-action-btn horizontal" style="bottom: 90px; right: 24px;">
-    <a class="btn-floating btn-large red">
-      <i class="large material-icons">add</i>
-    </a>
-    <ul>
-      <li><a class="btn-floating red" href="?t=notice"><i class="material-icons">chat</i></a></li>
-      <li><a class="btn-floating yellow" href="?t=problem"><i class="material-icons">description</i></a></li>
-      <li><a class="btn-floating green" href="?t=user"><i class="material-icons">perm_contact_calendar</i></a></li>
-      <li><a class="btn-floating blue" href="?t=rule"><i class="material-icons">forum</i></a></li>
-    </ul>
-  </div>
+    <div class="fixed-action-btn horizontal" style="bottom: 80px; right: 24px;">
+      <a class="btn-floating btn-large red">
+        <i class="large material-icons">mode_edit</i>
+      </a>
+      <ul>
+        <li><a class="btn-floating red" href="?t=notice"><i class="material-icons">chat</i></a></li> <!-- notice -->
+        <li><a class="btn-floating yellow" href="?t=problem"><i class="material-icons">description</i></a></li> <!-- problem -->
+        <li><a class="btn-floating green" href="?t=user"><i class="material-icons">perm_contact_calendar</i></a></li><!-- User -->
+        <li><a class="btn-floating blue" href="?t=rule"><i class="material-icons">forum</i></a></li><!-- rule -->
+      </ul>
+    </div>
     {% if cur == "notice" %}
     <h5 class="center"> Add Notice </h5>
     <form class="col offset-s3 s6" method="post">
       <div class="row">
         <div class="input-field col s12">
-          <textarea name="notice" type="text" class="validate"></textarea>
+          <textarea name="notice" type="text" class="validate materialize-textarea"></textarea>
           <label for="first_name">Text</label>
         </div>
         <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
@@ -38,7 +38,7 @@
     <form class="col offset-s3 s6" method="post">
       <div class="row">
         <div class="input-field col s12">
-          <textarea name="rule" type="text" class="validate"></textarea>
+          <textarea name="rule" type="text" class="validate materialize-textarea"></textarea>
           <label for="first_name">Text</label>
         </div>
         <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
@@ -46,7 +46,137 @@
         </button>
       </div>
     </form>
-    {% endif %}
-  </div>
-</div>
-{% endblock %}
+    {% elif cur == "user" %}
+    <h5 class="center"> Change User </h5>
+    <div class="row">
+      <div class="col offset-s3 s6">
+        {% if target == None %}
+        <table>
+          <thead>
+            <th>index</th>
+            <th>UserName</th>
+            <th>Type</th>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="?t=user&target={{ user.id }}">{{ user.userid }}</a></td>
+              <td>{% if user._type == 0 %} ~15 {% else %} 16 {% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <form class="col s12" method="post">
+          <div class="row">
+            <div class="input-field col s12">
+              <label for="first_name">Username</label>
+              <input disabled name="username" type="text" class="validate" value="{{ users.userid }}">
+            </div>
+            <div class="input-field col s12">
+              <input name="pw" type="password" class="validate">
+              <label for="last_name">Password</label>
+            </div>
+            <div class="input-field col s12">
+              <input name="pwchk" type="password" class="validate">
+              <label for="last_name">Password Check</label>
+            </div>
+            <div class="input-field col s12">
+              <input name="name" type="text" class="validate" value="{{users.name}}">
+              <label for="last_name">Name</label>
+            </div>
+            <div class="col s12" style="padding-bottom: 24px">
+              <label>GoN Entrance Year</label>
+              <select name="eyear" class="browser-default">
+                <option value="0" {% if users._type==0 %}selected{% endif %}>~15</option>
+                <option value="1" {% if users._type==1 %}selected{% endif %}>16</option>
+              </select>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+              <i class="material-icons right">send</i>
+            </button>
+          </div>
+        </form>
+
+        {% endif %}
+      </div>
+    </div>
+
+    {% elif cur == "problem" %}
+    <div class="center">
+      <h5 class="center" style="display:inline-block"> Change Problem </h5>
+      {% if target == None %}
+      <a class="btn-floating btn-large waves-effect waves-light green" href="?t=problem&target=0"><i class="material-icons">add</i></a>
+      {% endif %}
+    </div>
+    <div class="row">
+      {% if target == None %}
+      <div class="col offset-s2 s8">
+        <table>
+          <thead>
+            <th>index</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Category</th>
+            <th>State</th>
+          </thead>
+          <tbody>
+            {% for problem in problems %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="?t=problem&target={{ problem.id }}">{{ problem.name }}</a></td>
+              <td>{{ problem.scores }}({{ problem.solver }})</td>
+              <td>{{ problem.category }}</td>
+              <td>{% if problem.is_hot %}<span class="red-text"> hot</span> | {% endif %}{% if problem.is_open %} <span class="blue-text">open</span> {% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="col offset-s3 s6">
+          <form class="col s12" method="post">
+            <div class="row">
+              <div class="input-field col s12">
+                <label for="first_name">name</label>
+                <input name="name" type="text" class="validate" value="{{ problems.name }}">
+              </div>
+              <div class="input-field col s12">
+                <label for="first_name">description</label>
+                <textarea name="description" type="text" class="validate materialize-textarea">{{ problems.description }}</textarea>
+              </div>
+
+              <div class="input-field col s12">
+                <label for="first_name">flag</label>
+                <input name="flag" type="text" class="validate" value="{{ problems.flag }}">
+              </div>
+  
+              <div class="col s12">
+              <label>Category</label>
+              <select name="category" class="browser-default">
+                {% for category in categories %}
+                <option value="{{ category }}" {% if problems.category==category%}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+              </select>
+            </div>
+              <div class="input-field col s12">
+                <p>
+                  <input name="ishot" type="checkbox" id="ishot" {% if problems.is_hot %} checked="checked" {% endif %}/>
+                  <label for="ishot">Hot</label>
+                </p>
+                <p>
+                  <input name="opened" type="checkbox" id="opened" {% if problems.is_open %} checked="checked" {% endif %}/>
+                  <label for="opened">Opened</label>
+                </p>
+              </div>
+              <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+                <i class="material-icons right">send</i>
+              </button>
+            </div>
+          </form>
+
+          {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      {% endblock %}

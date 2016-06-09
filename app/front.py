@@ -37,6 +37,11 @@ def main():
     left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
     return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
 
+@frontend.route("/rank")
+@login_required
+def rank():
+    return render_template('rank.html', users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).all())
+
 @frontend.route("/Notice")
 def notice():
     return render_template("notice.html", notices = Notice.query.order_by(desc(Notice.id)).all())
@@ -124,6 +129,11 @@ def admin():
         cur = request.args['t']
     except:
         cur = "notice"
+    try:
+        target = request.args['target']
+    except:
+        target = None
+
     if request.method == "POST":
         if cur == 'notice':
             notice = Notice(request.form["notice"])
@@ -135,8 +145,105 @@ def admin():
             db_session.add(rule)
             db_session.commit()
             msg = "rule added"
+        elif cur == 'user':
+            pw = request.form['pw']
+            pwchk = request.form['pwchk']
+            name = request.form['name']
+            eyear = request.form['eyear']
+            user = User.query.filter_by(id = target).first()
+
+            if not eyear in ["0", "1"]:
+                msg = "no Troll"
+            else:
+                user._type = int(eyear)
+
+            if pw:
+                if pw == pwchk:
+                    user.set_password(pw)
+                else:
+                    msg = "password and password check is differ"
+
+            if name:
+                user.name = name
+
+            db_session.commit()
+            return redirect(url_for("frontend.admin", t="user"))
+        elif cur == 'problem':
+            name = request.form['name']
+            desc = request.form['description']
+            flag = request.form['flag']
+            cate = request.form['category']
+            try:
+                hot = True if request.form['ishot']=="on" else False
+            except:
+                hot = False
+            try:
+                opened = True if request.form['opened']=="on" else False
+            except:
+                opened = False
+            if target == 0:
+                if name and desc and flag and cate:
+                    problem = Problem(name, desc, flag, cate)
+                    problem.is_hot = hot
+                    problem.is_open = opened
+                    if opened:
+                        notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                        db_session.add(notice)
+                    db_session.add(problem)
+                else:
+                    return render_template("frontend.admin", t="problem", msg="fail")
+            else:
+                problem = Problem.query.filter_by(id = target).first()
+            if problem:
+                if name:
+                    if name != problem.name and problem.is_open:
+                        notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> renamed to %s!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name, name))
+                        db_session.add(notice)
+                    problem.name = name
+                if desc:
+                    if desc != problem.description and problem.is_open:
+                        notice = Notice("More information is provided to <a href=\"%s\"><b>[%s]</b>%s</a> !" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                        db_session.add(notice)
+                    problem.description = desc
+                if flag:
+                    problem.flag = flag
+                if cate and cate in config.category:
+                    if cate != problem.category and problem.is_open:
+                        notice = Notice("<a href=\"%s\">%s</a> is moved to %s(before: %s)!" %(url_for('frontend.show', _id = problem.id), problem.name, cate, problem.category))
+                        db_session.add(notice)
+                    problem.category = cate
+                problem.is_hot = hot
+                if not problem.is_open and opened:
+                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                    db_session.add(notice)
+                if problem.is_open and not opened:
+                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> closed!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                    db_session.add(notice)
+
+                problem.is_open = opened
+
+            db_session.commit()
+            return redirect(url_for("frontend.admin", t="problem"))
+
         else:
             cur = "notice"
+    if not cur in ['notic', 'rule', 'user', 'problem']:
+        cur = "notice"
+    elif cur == 'user':
+        if target:
+            user = User.query.filter_by(id = target).first()
+            return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
+        else:
+            user = User.query.filter(User._type != 2).all()
+            return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
+    elif cur == 'problem':
+        if target:
+            problem = Problem.query.filter_by(id = target).first()
+            return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target, categories = config.category)
+        else:
+            problem = Problem.query.all()
+            map(lambda x: x.update_score(), problem)
+            return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target)
 
     return render_template("admin.html", msg = msg, cur = cur)
 

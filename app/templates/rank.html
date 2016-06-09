@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block body %}
+  <div class="row center" style="padding-top:24px">
+    <div class="col offset-s2 s8">
+      <h5> Rank </h5>
+      <table class="centered highlight">
+        <thead>
+          <tr>
+            <th data-field="rank">Rank</th>
+            <th data-field="name">Name</th>
+            <th data-field="score">Score</th>
+            <th data-field="lastauth">authtime</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
+            <td>{{ user.score }}</td>
+            <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endblock %}
+

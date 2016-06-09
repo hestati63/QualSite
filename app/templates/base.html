@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title> GoN Kapo Qual </title>
+    <title> GoN Kapo CTF </title>
     <link rel=stylesheet type=text/css href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.css">
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/qual.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.png') }}"/>
@@ -31,9 +31,7 @@
           <li><a href="{{ url_for('frontend.rule') }}">Rule</a></li>
           <li><a href="{{ url_for('frontend.prob') }}">Probs</a></li>
           <li><a href="{{ url_for('frontend.notice') }}">Notice</a></li>
-          {% if current_user and current_user.is_admin %}
-          <li><a href="{{ url_for('frontend.refill') }}">Open Problem</a></li>
-          {% endif %}
+          <li><a href="{{ url_for('frontend.rank') }}">Rank</a></li>
         </ul>
       </div>
     </nav>

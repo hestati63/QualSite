@@ -20,6 +20,9 @@
         </div>
         <div class="col s8">
           {{ user.name }}<br>
+          {% if user.last_auth_failed %}{{ (user.last_auth_failed | string)[:19]}}{% endif %}<br>
+          {% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19]}}{% endif %}<br>
+          {{ user.score }}<br>
         </div>
       </div>
     </div>
