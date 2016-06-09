@@ -46,6 +46,23 @@
     {% endfor %}
   </div>
   <div class="col s4">
+    <h5 class="center"> Notice </h5>
+    <div class="row">
+    <table class="centered">
+      <tbody>
+        {% for notice in notices %}
+        <tr style="height:24px">
+          <td style="background-color:#fff; height:24px">
+            <div class="col s1"> {{ notice.id }} </div>
+            <div class="col s7"><span class="center">{{ notice.body | safe }}</span></div>
+            <div class="col s4"> {{ (notice.upload | string)[:19]}}</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <hr></hr>
     <h5 class="center"> Scoreboard </h5>
     <div class="row">
       <div class="col s12">
@@ -67,7 +84,7 @@
           </thead>
           <tbody>
             {% for user in U15 %}
-            <tr>
+            <tr {% if user == current_user %}class="me"{% endif %}>
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
@@ -91,7 +108,7 @@
           </thead>
           <tbody>
             {% for user in U16 %}
-            <tr>
+            <tr {% if user == current_user %}class="me"{% endif %}>
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>

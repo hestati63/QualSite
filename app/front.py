@@ -14,6 +14,9 @@ loginmanager.login_view = 'frontend.login'
 
 debug = True
 
+@app.errorhandler(404)
+def error404(er):
+    return render_template("404.html"), 404
 
 from datetime import datetime
 @loginmanager.user_loader
@@ -36,7 +39,7 @@ def main():
 def rank():
     return render_template('rank.html', users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).all())
 
-@frontend.route("/Notice")
+@frontend.route("/notice")
 def notice():
     return render_template("notice.html", notices = Notice.query.order_by(desc(Notice.id)).all())
 
@@ -56,9 +59,9 @@ def prob():
     for i in problems:
         prs[i.category].append(i)
 
-    U15 = User.query.filter_by(_type = 0).order_by(desc(User.score), asc(User.last_auth_success)).all()
-    U16 = User.query.filter_by(_type = 1).order_by(desc(User.score), asc(User.last_auth_success)).all()
-    return render_template("prob.html", pr = prs, categories = config.category, U15 = U15, U16 = U16)
+    U15 = User.query.filter_by(_type = 0).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U16 = User.query.filter_by(_type = 1).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    return render_template("prob.html", pr = prs, categories = config.category, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), U15 = U15, U16 = U16)
 
 @frontend.route("/login", methods=["GET", "POST"])
 def login():
@@ -88,7 +91,11 @@ def signup():
             pwchk = request.form['pwchk']
             name = request.form['name']
             eyear = request.form['eyear']
-            if not eyear in ["0", "1"]:
+            if username < 4:
+                msg = "username is too short!"
+            elif username > 10:
+                msg = "username is too long!"
+            elif not eyear in ["0", "1"]:
                 msg = "no Troll"
             elif not all(map(lambda x: x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_', username)):
                 msg = "Not allowed character in id"

@@ -6,16 +6,21 @@
     <div class="col offset-s1 s11">
       <span><h4 style="display: inline-block"> {{ user.userid }} </h4> 
 
+        {% if rank <= 3 %}
+        <div class="chip rank{{rank}}">Rank{{rank}}</div>
+        {% else %}
         <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> Rank: {{ rank }}</div>
+        {% endif %}
+
       </span>
     </div>
     <hr></hr>
     <div style="padding: 12px 24px 0 24px">
       <div class="row">
         <div class="col s2">
-          <b class="right">name</b><br>
-          <b class="right">last_auth_failed</b><br>
-          <b class="right">last_auth_successed</b><br>
+          <b class="right">Name</b><br>
+          <b class="right">Last submit</b><br>
+          <b class="right">Last auth</b><br>
           <b class="right">Score</b><br>
         </div>
         <div class="col s8">

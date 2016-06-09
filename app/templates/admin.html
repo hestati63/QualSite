@@ -128,7 +128,7 @@
               <td><a href="?t=problem&target={{ problem.id }}">{{ problem.name }}</a></td>
               <td>{{ problem.scores }}({{ problem.solver }})</td>
               <td>{{ problem.category }}</td>
-              <td>{% if problem.is_hot %}<span class="red-text"> hot</span> | {% endif %}{% if problem.is_open %} <span class="blue-text">open</span> {% endif %}</td>
+              <td>{% if problem.is_hot %}<span class="red-text"> hot</span>|{% endif %}{% if problem.is_open %}<span class="blue-text">open</span> {% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>

@@ -2,6 +2,30 @@
 {
   text-align: center;
 }
+.rank1
+{
+  display: inline-block;
+  background-color:#039be5;
+  color:#fff;
+}
+.rank2
+{
+  display: inline-block;
+  background-color:#64dd17;
+  color:#fff;
+}
+.rank3
+{
+  display: inline-block;
+  background-color:#ffab91;
+  color:#fff;
+}
+.me
+{
+  background-color:#e8eaf6;
+  font-weight: bold;
+}
+
 .tabs .tab a
 {
   color: #81c784;
