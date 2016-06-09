@@ -20,12 +20,6 @@ from datetime import datetime
 def load_user(userid):
         return User.query.get(userid)
 
-@frontend.route("/refill")
-def refill():
-    if current_user.is_admin:
-        current_user.is_open_able = 1
-    return redirect(url_for("frontend.prob"))
-
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
     start = mktime(datetime(2016, 9, 1, 0, 0).timetuple()) - time()
@@ -80,7 +74,6 @@ def login():
     return render_template("login.html", msg = msg)
 
 @frontend.route("/logout")
-@login_required
 def logout():
     logout_user()
     return redirect(url_for("frontend.main"))
@@ -151,7 +144,6 @@ def admin():
             name = request.form['name']
             eyear = request.form['eyear']
             user = User.query.filter_by(id = target).first()
-
             if not eyear in ["0", "1"]:
                 msg = "no Troll"
             else:
@@ -162,10 +154,8 @@ def admin():
                     user.set_password(pw)
                 else:
                     msg = "password and password check is differ"
-
             if name:
                 user.name = name
-
             db_session.commit()
             return redirect(url_for("frontend.admin", t="user"))
         elif cur == 'problem':
@@ -181,19 +171,24 @@ def admin():
                 opened = True if request.form['opened']=="on" else False
             except:
                 opened = False
-            if target == 0:
-                if name and desc and flag and cate:
-                    problem = Problem(name, desc, flag, cate)
+            if target == "0":
+                problem = Problem.query.filter_by(name = name).first()
+                if not problem and name and desc and flag and cate and cate in config.category:
+                    problem = Problem(name, desc, cate, flag)
                     problem.is_hot = hot
                     problem.is_open = opened
+                    db_session.add(problem)
+                    db_session.commit()
                     if opened:
                         notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
                         db_session.add(notice)
-                    db_session.add(problem)
+                        db_session.commit()
+                    return redirect(url_for("frontend.admin", t="problem", msg="added"))
                 else:
-                    return render_template("frontend.admin", t="problem", msg="fail")
+                    return redirect(url_for("frontend.admin", t="problem", msg="added"))
             else:
                 problem = Problem.query.filter_by(id = target).first()
+
             if problem:
                 if name:
                     if name != problem.name and problem.is_open:

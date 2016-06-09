@@ -1,16 +1,23 @@
 .Container
 {
-    text-align: center;
+  text-align: center;
 }
-
+.tabs .tab a
+{
+  color: #81c784;
+}
+.tabs .indicator
+{
+  background-color: #e8f5e9;
+}
 nav 
 {
-    background-color: #81c784;
+  background-color: #81c784;
 }
 
 .btn
 {
-left:12px;
+  left:12px;
 }
 
 a {color: #000;}
@@ -31,16 +38,16 @@ h3.valign:after { content: ""; display: block; clear: both; }
 
 .Container:before
 {
-    content: '';
-    height: 100%;
-    display: inline-block;
-    vertical-align: middle;
+  content: '';
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .Content
 {
-    display: inline-block;
-    vertical-align: middle;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 body {
