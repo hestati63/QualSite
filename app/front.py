@@ -101,12 +101,14 @@ def signup():
             elif len(pw) < 5:
                 msg = "password should be longer than 5 letters"
             elif pw == pwchk:
-                if config.registkey == request.form['regkey']:
+                if config.registkey == request.form['regkey'] or config.admin_registkey == request.form['regkey']:
                     chk = User.query.filter_by(userid = username).first()
                     if chk:
                         msg = "user already exists"
                     else:
                         user = User(username, pw, name, eyear)
+                        if config.admin_registkey == request.form['regkey']:
+                            user.is_admin = True
                         db_session.add(user)
                         db_session.commit()
                         map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())

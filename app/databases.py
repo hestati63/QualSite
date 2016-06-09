@@ -15,6 +15,7 @@ Base.query = db_session.query_property()
 import models
 def init_db():
         Base.metadata.create_all(bind=engine)
+        '''
         rules = [u"키공유 금지",
         u"각 분야(pwn, web, rev, forensic, misc)중 3분야에서 1문제 이상 풀이, 1분야에서 2문제 이상 풀이",
         u"카포전 출전 인원은 20%는 회장 재량 40%는 15이상에서 40%는 16에서 선출",
@@ -69,6 +70,7 @@ def init_db():
 
                 db_session.add(t)
                 db_session.commit()
+        '''
 
 
 def load_from_conf(f):

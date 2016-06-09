@@ -7,3 +7,4 @@ score_max = 600
 user_num = 40
 
 registkey = "a"
+admin_registkey = "b"
