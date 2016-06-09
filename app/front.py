@@ -51,7 +51,6 @@ def rule():
 @login_required
 def prob():
     problems = Problem.query.all()
-    map(lambda x: x.update_score(), problems)
     prs = {}
     for key in config.category:
         prs[key] = []
@@ -244,7 +243,6 @@ def admin():
             return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target, categories = config.category)
         else:
             problem = Problem.query.all()
-            map(lambda x: x.update_score(), problem)
             return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target)
 
     return render_template("admin.html", msg = msg, cur = cur)
@@ -308,13 +306,12 @@ def show(_id):
                 db_session.add(notice)
                 db_session.commit()
                 msg = "U got Breakthrough!!! Plz open new problem!!!"
-            problem.add_solver(current_user)
+            msg = problem.add_solver(current_user)
         else:
             msg = "Wrong!"
 
     if not problem.is_open:
         return redirect(url_for("frontend.prob"))
-    problem.update_score()
 
     return render_template("show_prob.html", problem = problem, msg = msg)
 

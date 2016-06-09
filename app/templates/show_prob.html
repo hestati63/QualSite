@@ -18,7 +18,7 @@
     </div>
     <div class="col s8">
       {{ problem.category }}<br>
-      {% if problem.fb %}{{ problem.fb }}{% endif %}<br>
+      {% if problem.fb %}<a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>{% endif %}<br>
       {{ problem.solver }}<br>
       {{ (problem.openat | string)[:19]}} 
     </div>
