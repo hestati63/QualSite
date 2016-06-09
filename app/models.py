@@ -66,6 +66,12 @@ class User(Base):
         self.is_open_able = 0
         self.score = 0
 
+    def rebuild_score(self):
+        self.score = 0
+        for problem in self.solves:
+            self.score += problem.scores
+        db_session.commit()
+
     def __repr__(self):
         return '<User: %s>' % (self.userid)
 
@@ -116,7 +122,7 @@ class Problem(Base):
         self.category = category
         self.flag = flag
         self.is_hot = True
-        self.score = update_score(0)
+        self.set_score(update_score(0))
 
     def open(self):
         self.is_open = True
@@ -152,9 +158,13 @@ class Problem(Base):
         for solver in self.solvers:
             solver.score += score_now
         user.score += score_now
+        user.last_auth_success = datetime.datetime.now()
         db_session.commit()
+    def set_score(self, score):
+        self.scores = score
 
 def update_score(count):
-    return int(config.score_max * math.log(1.1 * config.user_num / (count + 1)) / math.log(0.55 * config.user_num))
+    user_num = User.query.count()
+    return int(config.score_max * math.log(1.1 * user_num / (count + 1)) / math.log(0.55 * user_num))
 
 

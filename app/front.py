@@ -90,9 +90,9 @@ def signup():
             pwchk = request.form['pwchk']
             name = request.form['name']
             eyear = request.form['eyear']
-            if username < 4:
+            if len(username) < 4:
                 msg = "username is too short!"
-            elif username > 10:
+            elif len(username) > 10:
                 msg = "username is too long!"
             elif not eyear in ["0", "1"]:
                 msg = "no Troll"
@@ -109,6 +109,9 @@ def signup():
                         user = User(username, pw, name, eyear)
                         db_session.add(user)
                         db_session.commit()
+                        map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())
+                        db_session.commit()
+                        map(lambda x: x.rebuild_score(), User.query.all())
                         return redirect(url_for("frontend.login"))
                 else:
                     msg = "wrong regist key"
@@ -306,8 +309,10 @@ def show(_id):
                 db_session.add(notice)
                 db_session.commit()
                 msg = "U got Breakthrough!!! Plz open new problem!!!"
-            msg = problem.add_solver(current_user)
+            result = problem.add_solver(current_user)
+            msg = result if result else msg
         else:
+            current_user.last_auth_failed = datetime.now()
             msg = "Wrong!"
 
     if not problem.is_open:

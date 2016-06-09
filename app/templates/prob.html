@@ -30,16 +30,20 @@
           </span>
         </a>
         {{ problem.scores }} 
-        {% if problem.solver %} 
+        {% if current_user == problem.fb %}
+        <div class="chip" style="display: inline-block; background-color: #64b5f6;color:#fff">
+          first solver
+        </div>
+        {% elif problem.fb %} 
         <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">
           <a style="color:#fff" href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>
         </div>
+        {% endif %}
         {% if current_user in problem.solvers %}
         <div class="chip" style="display: inline-block; background-color: #f48fb1;color:#fff">
           solved
         </div>
-          {% endif %}
-      {% endif %}
+        {% endif %}
     </span>
       {% else %}
       {% if current_user and not current_user.is_open_able %}

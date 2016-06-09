@@ -44,7 +44,7 @@
         {% for prob in user.solves %}
         <a href="{{ url_for('frontend.show', _id = prob.id) }}"><b>[{{ prob.category }}]</b>{{ prob.name }}</a>
         <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> {{ prob.scores }}</div>
-        {% if prob.fb == current_user %}
+        {% if prob.fb == user %}
         <div class="chip" style="display: inline-block; background-color: #ef9a9a;color:#fff">First Solver</div>
         {% endif %}
         <br>
