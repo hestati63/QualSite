@@ -17,16 +17,16 @@
     <span><b>{{ category }} </b></span><br>
     {% for problem in pr[category] %}
     <span class="valign">
-    {% if problem.is_open %}
+      {% if problem.is_open %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
         {% if problem.is_hot %}
         <span class="burning">
           <i class="tiny material-icons">star</i>
-        {% else %}
+          {% else %}
           <span>
             <i class="tiny material-icons">label</i>
-         {% endif %}
-         {{ problem.name }}({{ problem.solver }})
+            {% endif %}
+            {{ problem.name }}({{ problem.solver }})
           </span>
         </a>
         {{ problem.scores }} {% if problem.solver %} <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> {{ problem.fb }} </div>{% endif %}</span>
@@ -39,25 +39,71 @@
       </a>
       {% endif %}
       {% endif %}
-      </span>
-      <br>
-      {% endfor %}
-      <br>
-      {% endfor %}
-    </div>
-    <div class="col s4">
-      <h5 class="center"> Scoreboard </h5>
-      <div class="row">
-        <div class="col s12">
-          <ul class="tabs">
-            <li class="tab col s6"><a class="active"href="#15">15&#8593</a></li>
-            <li class="tab col s6"><a href="#16">16</a></li>
-          </ul>
-        </div>
-        <div id="15" class="col s12">Test 1</div>
-        <div id="16" class="col s12">Test 2</div>
+    </span>
+    <br>
+    {% endfor %}
+    <br>
+    {% endfor %}
+  </div>
+  <div class="col s4">
+    <h5 class="center"> Scoreboard </h5>
+    <div class="row">
+      <div class="col s12">
+        <ul class="tabs">
+          <li class="tab col s6"><a class="active"href="#15">15&#8593</a></li>
+          <li class="tab col s6"><a href="#16">16</a></li>
+        </ul>
+      </div>
+      <div id="15" class="col s12">
+
+        <table class="centered highlight">
+          <thead>
+            <tr>
+              <th data-field="rank">Rank</th>
+              <th data-field="name">Name</th>
+              <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in U15 %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
+              <td>{{ user.score }}</td>
+              <td>{{ (user.last_auth_time | string)[:19] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+      <div id="16" class="col s12">
+
+        <table class="centered highlight">
+          <thead>
+            <tr>
+              <th data-field="rank">Rank</th>
+              <th data-field="name">Name</th>
+              <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in U16 %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
+              <td>{{ user.score }}</td>
+              <td>{{ (user.last_auth_time | string)[:19] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
       </div>
     </div>
   </div>
+</div>
 
 {% endblock %}

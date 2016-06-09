@@ -36,10 +36,20 @@ def init_db():
                 db_session.add(t)
                 db_session.commit()
         if True:
-            t = models.User("admin", "admin", "admin", 1)
+            t = models.User("admin", "admin", "admin", 2)
             t.is_admin = True
             db_session.add(t)
             t = models.User("guest", "guest", "guest", 1)
+            t.score = 100
+            db_session.add(t)
+            t = models.User("guest2", "guest", "guest", 1)
+            t.score = 200
+            db_session.add(t)
+            t = models.User("guest3", "guest", "guest", 0)
+            t.score = 150
+            db_session.add(t)
+            t = models.User("guest4", "guest", "guest", 0)
+            t.score = 300
             db_session.add(t)
             db_session.commit()
 

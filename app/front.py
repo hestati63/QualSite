@@ -1,8 +1,7 @@
 #-*- coding: utf-8 -*-
 from flask import Flask, render_template, abort, request, session, flash, url_for, redirect, Blueprint
-from flask.ext.session import Session
 from flask.ext.login import login_required, login_user, logout_user, current_user, LoginManager
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 from databases import db_session
 from time import time, mktime
 from models import *
@@ -36,7 +35,7 @@ def main():
     problems = Problem.query.filter_by(is_open = True).filter_by(is_hot = True).all()
 
     left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
-    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
+    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).limit(10).all())
 
 @frontend.route("/Notice")
 def notice():
@@ -58,7 +57,9 @@ def prob():
     for i in problems:
         prs[i.category].append(i)
 
-    return render_template("prob.html", pr = prs, categories = config.category)
+    U15 = User.query.filter_by(_type = 0).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all()
+    U16 = User.query.filter_by(_type = 1).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all()
+    return render_template("prob.html", pr = prs, categories = config.category, U15 = U15, U16 = U16)
 
 @frontend.route("/login", methods=["GET", "POST"])
 def login():
@@ -129,6 +130,11 @@ def admin():
             db_session.add(notice)
             db_session.commit()
             msg = "notice added"
+        elif cur == 'rule':
+            rule = Rule(request.form["rule"])
+            db_session.add(rule)
+            db_session.commit()
+            msg = "rule added"
         else:
             cur = "notice"
 
@@ -164,13 +170,21 @@ def mypage():
 
         return render_template("mypage.html", msg = msg)
 
+def getrank(user, allrank = False):
+    if user.is_admin: return 0
+    if allrank:
+        return User.query.filter(User._type != 2).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all().index(user) + 1
+    else:
+        return User.query.filter_by(_type = user._type).order_by(desc(User.last_auth_success)).order_by(desc(User.score)).all().index(user) + 1
+
+
 @frontend.route("/user/<int:_id>")
 @login_required
 def show_user(_id):
     user = User.query.filter_by(id=_id).first()
     if not user:
         return redirect(url_for('frontend.main'))
-    return render_template('show_user.html', user = user)
+    return render_template('show_user.html', user = user, rank = getrank(user, True))
 
 @frontend.route("/show/<int:_id>", methods=["GET", "POST"])
 @login_required

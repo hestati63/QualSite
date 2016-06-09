@@ -41,6 +41,7 @@ class User(Base):
     last_auth_failed  = Column(DateTime, unique = False)
     is_admin = Column(Boolean, unique = False)
     is_open_able = Column(Integer, unique = False)
+    score = Column(Integer, unique = False)
 
     def __init__(self, userid=None, passwd=None, name=None, _type = 0):
         self.userid = userid
@@ -53,6 +54,7 @@ class User(Base):
         self.last_auth_failed = None
         self.is_admin = False
         self.is_open_able = 0
+        self.score = 0
 
     def __repr__(self):
         return '<User: %s>' % (self.userid)
