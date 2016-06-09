@@ -8,8 +8,8 @@ You should change the registeration keys and secret key for app in config.py.
 Also, you can change maximum score for problem.
 
 This CTF framework's system is based on defcon2016 qual system.
-  - First solver for each problem can open new problem.
-  - Score of each problem is based on numbers of solvers.
+  - First solver of each problem can open new problem.
+  - Score of each problem depends on numbers of solvers.
 
 ## init db
 ```sh
