@@ -19,3 +19,17 @@ if __name__ == "__main__":
     elif argv[1] == "load":
         with open(argv[2]) as f:
             databases.load_from_conf(f)
+    elif argv[1] == "sass":
+        import codecs, os
+        from scss import Scss
+        css = Scss()
+        src = argv[2]
+        dst = argv[3]
+        cwd = os.getcwd()
+        os.chdir('/'.join(src.split("/")[:-1]))
+        source = codecs.open(src.split("/")[-1], 'r', encoding='utf-8').read()
+        output = css.compile(source)
+        os.chdir(cwd)
+        outfile = codecs.open(dst, 'w', encoding='utf-8')
+        outfile.write(output)
+        outfile.close()
