@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="row" style="padding-top:24px">
-  <div class="col offset-s2 s8">
+  <div class="col offset-m2 m8 offset-s1 s10 offset-l2 l8">
     <h5 class="center"> Login </h5>
     <form class="col offset-s3 s6" method="post">
+      {{ form.hidden_tag() }}
       <div class="row">
         <div class="input-field col s12">
-          <input name="username" type="text" class="validate">
+          {{ form.username(autofocus=true) }}
           <label for="first_name">Username</label>
         </div>
         <div class="input-field col s12">
-          <input name="pw" type="password" class="validate">
+          {{ form.password() }}
           <label for="last_name">Password</label>
         </div>
         <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
@@ -21,3 +22,16 @@
   </div>
 </div>
 {% endblock %}
+{% block script %}
+{% macro error_field(field) %}
+{% if field.errors %}
+{% for error in field.errors %}
+Materialize.toast("{{ field.id }} - {{ error }}", 4000);
+{% endfor %}
+{% endif %}
+{% endmacro %}
+<script>
+  {{ error_field(form.username) }}
+  {{ error_field(form.password) }}
+</script>
+{% endblock script %}

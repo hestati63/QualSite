@@ -1,27 +1,23 @@
 #-*- coding: utf-8 -*-
-from flask import Flask, render_template, abort, request, session, flash, url_for, redirect, Blueprint
-from flask.ext.login import login_required, login_user, logout_user, current_user, LoginManager
+from flask import Flask, render_template, abort, request, url_for, redirect, Blueprint
+from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import desc, asc
-from databases import db_session
 from time import time, mktime
 from models import *
-import config, string
-from . import app
+from forms import *
+import config
+from . import loginmanager, db_session, app
 
 frontend = Blueprint('frontend', __name__)
-loginmanager = LoginManager(app)
 loginmanager.login_view = 'frontend.login'
 
-
 @app.errorhandler(404)
-def error404(er):
+def error404(err):
     return render_template("404.html"), 404
 
-from datetime import datetime
 @loginmanager.user_loader
 def load_user(userid):
-        return User.query.get(userid)
-
+    return User.query.get(userid)
 
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
@@ -29,7 +25,7 @@ def main():
     if start > 0:
         return render_template("count.html", left = start, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
 
-    problems = Problem.query.filter_by(is_open = True).filter_by(is_hot = True).all()
+    problems = Problem.query.filter_by(open = True).filter_by(hot = True).all()
 
     left = mktime(config.game_end.timetuple()) - time()
     return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
@@ -51,7 +47,7 @@ def rule():
 @login_required
 def prob():
     start = mktime(config.game_start.timetuple()) - time()
-    if start > 0 and not current_user.is_admin:
+    if start > 0 and not current_user.admin:
         return render_template("count.html", left = start, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
     problems = Problem.query.all()
     prs = {}
@@ -67,16 +63,16 @@ def prob():
 
 @frontend.route("/login", methods=["GET", "POST"])
 def login():
+    form = LoginForm(request.form)
+    next = request.args.get('next') or url_for('frontend.main')
     msg = None
-    if request.method == "POST":
-        c_user = User.query.filter_by(userid=request.form['username']).first()
-        next = request.args.get('next') or url_for('frontend.main')
-        if c_user and c_user.check_password(request.form['pw']):
-            login_user(c_user)
+    if request.method == "POST" and form.validate():
+        msg = 'Login fail'
+        user = User.query.filter_by(userid=form.username.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
             return redirect(next)
-        else:
-            msg = 'Login fail'
-    return render_template("login.html", msg = msg)
+    return render_template("login.html", msg = msg, form=form)
 
 @frontend.route("/logout")
 def logout():
@@ -85,7 +81,7 @@ def logout():
 
 @frontend.route("/signup", methods=["GET", "POST"])
 def signup():
-    msg = ""
+    msg = None
     try:
         if request.method == "POST":
             username = request.form['username']
@@ -111,7 +107,7 @@ def signup():
                     else:
                         user = User(username, pw, name, eyear)
                         if config.admin_registkey == request.form['regkey']:
-                            user.is_admin = True
+                            user.admin = True
                             user._type = 2
                         db_session.add(user)
                         db_session.commit()
@@ -131,8 +127,9 @@ def signup():
 @frontend.route("/admin", methods=["POST", "GET"])
 @login_required
 def admin():
-    if not current_user.is_admin: return redirect(url_for("frontend.main"))
-    msg = ""
+    if not current_user.admin:
+        abort(404)
+    msg = None
     try:
         cur = request.args['t']
     except:
@@ -158,7 +155,8 @@ def admin():
             pwchk = request.form['pwchk']
             name = request.form['name']
             eyear = request.form['eyear']
-            user = User.query.filter_by(id = target).first()
+            user = User.query.get(target) or abort(404)
+            
             if not eyear in ["0", "1"]:
                 msg = "no Troll"
             else:
@@ -169,10 +167,13 @@ def admin():
                     user.set_password(pw)
                 else:
                     msg = "password and password check is differ"
+
             if name:
                 user.name = name
+
             db_session.commit()
             return redirect(url_for("frontend.admin", t="user"))
+
         elif cur == 'problem':
             name = request.form['name']
             desc = request.form['description']
@@ -190,54 +191,51 @@ def admin():
                 problem = Problem.query.filter_by(name = name).first()
                 if not problem and name and desc and flag and cate and cate in config.category:
                     problem = Problem(name, desc, cate, flag)
-                    problem.is_hot = hot
+                    problem.hot = hot
                     db_session.add(problem)
                     db_session.commit()
                     if opened:
                         problem.open()
-                        notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                        db_session.add(notice)
-                        db_session.commit()
                     return redirect(url_for("frontend.admin", t="problem", msg="added"))
                 else:
-                    return redirect(url_for("frontend.admin", t="problem", msg="added"))
+                    return redirect(url_for("frontend.admin", t="problem", msg="failed"))
             else:
-                problem = Problem.query.filter_by(id = target).first()
+                problem = Problem.query.get(target) or abort(404)
 
-            if problem:
-                if name:
-                    if name != problem.name and problem.is_open:
-                        notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> renamed to %s!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name, name))
-                        db_session.add(notice)
-                    problem.name = name
-                if desc:
-                    if desc != problem.description and problem.is_open:
-                        notice = Notice("More information is provided to <a href=\"%s\"><b>[%s]</b>%s</a> !" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                        db_session.add(notice)
-                    problem.description = desc
-                if flag:
-                    problem.flag = flag
-                if cate and cate in config.category:
-                    if cate != problem.category and problem.is_open:
-                        notice = Notice("<a href=\"%s\">%s</a> is moved to %s(before: %s)!" %(url_for('frontend.show', _id = problem.id), problem.name, cate, problem.category))
-                        db_session.add(notice)
-                    problem.category = cate
-                problem.is_hot = hot
-                if not problem.is_open and opened:
-                    problem.open()
-                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+            if name:
+                if name != problem.name and problem.open:
+                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> renamed to %s!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name, name))
                     db_session.add(notice)
-                if problem.is_open and not opened:
-                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> closed!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                problem.name = name
+            if desc:
+                if desc != problem.description and problem.open:
+                    notice = Notice("More information is provided to <a href=\"%s\"><b>[%s]</b>%s</a> !" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
                     db_session.add(notice)
+                problem.description = desc
+            if flag:
+                problem.flag = flag
+            if cate and cate in config.category:
+                if cate != problem.category and problem.open:
+                    notice = Notice("<a href=\"%s\">%s</a> is moved to %s(before: %s)!" %(url_for('frontend.show', _id = problem.id), problem.name, cate, problem.category))
+                    db_session.add(notice)
+                problem.category = cate
+            problem.hot = hot
+            if not problem.open and opened:
+                problem.open()
+                notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                db_session.add(notice)
+            if problem.open and not opened:
+                notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> closed!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+                db_session.add(notice)
 
-                problem.is_open = opened
+            problem.open = opened
 
             db_session.commit()
             return redirect(url_for("frontend.admin", t="problem"))
 
         else:
             cur = "notice"
+
     if not cur in ['notic', 'rule', 'user', 'problem']:
         cur = "notice"
     elif cur == 'user':
@@ -260,106 +258,60 @@ def admin():
 @frontend.route("/mypage", methods=["POST", "GET"])
 @login_required
 def mypage():
-    if current_user.is_admin:
-        return redirect(url_for("frontend.admin"))
-    else:
-        msg = ""
-        try:
-            if request.method == "POST":
-                cpw = request.form['cpw']
-                pw = request.form['pw']
-                pwchk = request.form['pwchk']
-                name = request.form['name']
-                if current_user.check_password(cpw):
-                    if len(pw) < 5:
-                        msg = "password should be longer than 5 letters"
-                    elif pw == pwchk:
-                        current_user.name = name
-                        current_user.set_password(pw)
-                        db_session.commit()
-                        msg = "data successfully update"
-                    else:
-                        msg = "password and password check is differ"
+    msg = None
+    try:
+        if request.method == "POST":
+            cpw = request.form['cpw']
+            pw = request.form['pw']
+            pwchk = request.form['pwchk']
+            name = request.form['name']
+            if current_user.check_password(cpw):
+                if len(pw) < 5:
+                    msg = "password should be longer than 5 letters"
+                elif pw == pwchk:
+                    current_user.name = name
+                    current_user.set_password(pw)
+                    db_session.commit()
+                    msg = "data successfully update"
                 else:
-                    msg = "wrong current password"
-        except:
-            msg = "something wrong"
+                    msg = "password and password check is differ"
+            else:
+                msg = "wrong current password"
+    except:
+        msg = "something wrong"
 
-        return render_template("mypage.html", msg = msg)
-
-def getrank(user, allrank = False):
-    if user.is_admin: return 0
-    if allrank:
-        return User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).all().index(user) + 1
-    else:
-        return User.query.filter_by(_type = user._type).order_by(desc(User.score), asc(User.last_auth_success)).all().index(user) + 1
-
+    return render_template("mypage.html", msg = msg)
 
 @frontend.route("/user/<int:_id>")
 @login_required
 def show_user(_id):
-    user = User.query.filter_by(id=_id).first()
-    if not user:
-        return redirect(url_for('frontend.main'))
-    return render_template('show_user.html', user = user, rank = getrank(user, True))
+    user = User.query.filter_by(admin = False).filter_by(id = _id).first() or abort(404)
+    return render_template('show_user.html', user = user, rank = user.get_rank())
 
 @frontend.route("/show/<int:_id>", methods=["GET", "POST"])
 @login_required
 def show(_id):
-    problem = Problem.query.filter_by(id=_id).first()
-    msg = ""
+    start = mktime(config.game_start.timetuple()) - time()
+    if start > 0 and not current_user.admin:
+        return redirect(url_for("frontend.prob"))
+
+    msg = None
+    problem = Problem.query.filter_by(open = True).filter_by(id = _id).first() or abort(404)
     if request.method == "POST" and 'flag' in request.form.keys():
         if problem.check_flag(request.form['flag']):
-            msg = "Good!"
-            if problem.solver == 0:
-                notice = Notice("Wow! <a href=\"%s\">%s</a> <span class=\"red-text\">break</span> <a href=\"%s\"><b>[%s]</b>%s</a>!!!!" %(url_for('frontend.show_user', _id=current_user.id), current_user.userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                db_session.add(notice)
-                db_session.commit()
-                msg = "U got Breakthrough!!! Plz open new problem!!!"
-            result = problem.add_solver(current_user)
-            msg = result if result else msg
+            msg = problem.add_solver(current_user)
         else:
             current_user.last_auth_failed = datetime.now()
             msg = "Ddang"
 
-    if not problem.is_open:
-        return redirect(url_for("frontend.prob"))
-
-    start = mktime(config.game_start.timetuple()) - time()
-    if start > 0 and not current_user.is_admin:
-        return redirect(url_for("frontend.prob"))
-
     return render_template("show_prob.html", problem = problem, msg = msg)
-
-@frontend.route("/unhot/<int:_id>")
-@login_required
-def unhot(_id):
-    problem = Problem.query.filter_by(id=_id).first()
-
-    if not problem.is_open or not current_user.is_admin:
-        return redirect(url_for("frontend.prob"))
-
-    problem.is_hot = False
-    db_session.commit()
-    return redirect(url_for("frontend.prob"))
 
 @frontend.route("/open/<int:_id>")
 @login_required
 def open(_id):
-    problem = Problem.query.filter_by(id=_id).first()
+    problem = Problem.query.filter_by(open = False).filter_by(id = _id).first() or abort(404)
 
-    if problem.is_open or current_user.is_open_able <= 0:
+    if problem.open(current_user):
         return redirect(url_for("frontend.prob"))
-
-    problem.open()
-    current_user.is_open_able -= 1
-
-    if not current_user.is_admin:
-        notice = Notice("<a href=\"%s\">%s</a> open <a href=\"%s\"><b>[%s]</b>%s</a>!" %(url_for('frontend.show_user', _id=current_user.id), current_user.userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name))
     else:
-        problem.is_hot = False
-        notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-    db_session.add(notice)
-    db_session.commit()
-
-    return redirect(url_for("frontend.prob"))
+        abort(404)

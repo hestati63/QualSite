@@ -4,6 +4,11 @@
   vertical-align: middle;
   color: #fff;
 }
+span.badge
+{
+  line-height: 21px;
+  position:static;
+}
 span.badge.new:after
 {
   content: None;
@@ -35,7 +40,10 @@ span.badge.new:after
   background-color:#e8eaf6;
   font-weight: bold;
 }
-
+.valign
+{
+  vertical-align: middle;
+}
 .btn
 {
   left:12px;

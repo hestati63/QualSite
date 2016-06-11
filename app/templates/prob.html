@@ -23,13 +23,11 @@
     <span><b>{{ category }} </b></span><br>
     {% for problem in pr[category] %}
     <span class="valign">
-      {% if problem.is_open %}
+      {% if problem.open %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
-        <span style="display: inline-flex;
-              vertical-align: middle;">
-            <span class="new badge {% if problem.is_hot %}red lighten-2{% endif %}" style="right: inherit;display: inline-block">{{ problem.scores }}</span>
-            <span style="padding-left:3rem"></span>
-            <span {% if problem.is_hot %} class="burning" {% endif %} style="padding-left:4px">{{ problem.name }}({{ problem.solver }})</span>
+        <span style="display: inline-flex;">
+            <span class="new badge {% if problem.hot %}red lighten-2{% endif %}">{{ problem.scores }}</span>
+            <span {% if problem.hot %} class="burning" {% endif %} style="padding-left:4px">{{ problem.name }}({{ problem.solver }})</span>
           </span>
         </a>
         {% if current_user == problem.fb %}
@@ -48,7 +46,7 @@
         {% endif %}
     </span>
       {% else %}
-      {% if current_user and not current_user.is_open_able %}
+      {% if current_user and not current_user.openable %}
       <span><i class="tiny material-icons">lock</i>Locked</span>
       {% else %}
       <a href="{{url_for('frontend.open', _id = problem.id) }}">
