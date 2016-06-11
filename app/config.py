@@ -4,7 +4,11 @@ dbfile = './tmp.db'
 
 category = ["Pwnable", "Reversing", "Webhacking", "Forensic", "Coding"]
 score_max = 600
-user_num = 40
 
 registkey = "a"
 admin_registkey = "b"
+
+import datetime
+
+game_start = datetime.datetime(2016, 9, 1, 0, 0)
+game_end   = datetime.datetime(2016, 9, 6, 9, 0)

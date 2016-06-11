@@ -3,9 +3,15 @@
 <style>
   .chip
   {
-    height: 24px;
+    height: 20px;
     font-size: 10px;
-    line-height: 22px;
+    line-height: 20px;
+    padding: 0 8px;
+    color: #fff;
+  }
+  .chip a
+  {
+    color: #fff;
   }
 </style>
 {% endblock css %}
@@ -19,28 +25,24 @@
     <span class="valign">
       {% if problem.is_open %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
-        {% if problem.is_hot %}
-        <span class="burning">
-          <i class="tiny material-icons">star</i>
-          {% else %}
-          <span>
-            <i class="tiny material-icons">label</i>
-            {% endif %}
-            {{ problem.name }}({{ problem.solver }})
+        <span style="display: inline-flex;
+              vertical-align: middle;">
+            <span class="new badge {% if problem.is_hot %}red lighten-2{% endif %}" style="right: inherit;display: inline-block">{{ problem.scores }}</span>
+            <span style="padding-left:3rem"></span>
+            <span {% if problem.is_hot %} class="burning" {% endif %} style="padding-left:4px">{{ problem.name }}({{ problem.solver }})</span>
           </span>
         </a>
-        {{ problem.scores }} 
         {% if current_user == problem.fb %}
-        <div class="chip" style="display: inline-block; background-color: #64b5f6;color:#fff">
-          first solver
+        <div class="chip blue lighten-2">
+          <a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>
         </div>
         {% elif problem.fb %} 
-        <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">
-          <a style="color:#fff" href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>
+        <div class="chip green lighten-2">
+          <a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>
         </div>
         {% endif %}
         {% if current_user in problem.solvers %}
-        <div class="chip" style="display: inline-block; background-color: #f48fb1;color:#fff">
+        <div class="chip pink lighten-2">
           solved
         </div>
         {% endif %}

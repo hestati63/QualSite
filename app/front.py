@@ -12,7 +12,6 @@ frontend = Blueprint('frontend', __name__)
 loginmanager = LoginManager(app)
 loginmanager.login_view = 'frontend.login'
 
-debug = True
 
 @app.errorhandler(404)
 def error404(er):
@@ -23,15 +22,16 @@ from datetime import datetime
 def load_user(userid):
         return User.query.get(userid)
 
+
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
-    start = mktime(datetime(2016, 9, 1, 0, 0).timetuple()) - time()
-    if not debug and start > 0:
-        return render_template("count.html", left = start)
+    start = mktime(config.game_start.timetuple()) - time()
+    if start > 0:
+        return render_template("count.html", left = start, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
 
     problems = Problem.query.filter_by(is_open = True).filter_by(is_hot = True).all()
 
-    left = mktime(datetime(2016, 9, 5, 0, 0).timetuple()) - time()
+    left = mktime(config.game_end.timetuple()) - time()
     return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
 
 @frontend.route("/rank")
@@ -50,6 +50,9 @@ def rule():
 @frontend.route("/prob")
 @login_required
 def prob():
+    start = mktime(config.game_start.timetuple()) - time()
+    if start > 0 and not current_user.is_admin:
+        return render_template("count.html", left = start, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
     problems = Problem.query.all()
     prs = {}
     for key in config.category:
@@ -109,6 +112,7 @@ def signup():
                         user = User(username, pw, name, eyear)
                         if config.admin_registkey == request.form['regkey']:
                             user.is_admin = True
+                            user._type = 2
                         db_session.add(user)
                         db_session.commit()
                         map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())
@@ -187,10 +191,10 @@ def admin():
                 if not problem and name and desc and flag and cate and cate in config.category:
                     problem = Problem(name, desc, cate, flag)
                     problem.is_hot = hot
-                    problem.is_open = opened
                     db_session.add(problem)
                     db_session.commit()
                     if opened:
+                        problem.open()
                         notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
                         db_session.add(notice)
                         db_session.commit()
@@ -220,6 +224,7 @@ def admin():
                     problem.category = cate
                 problem.is_hot = hot
                 if not problem.is_open and opened:
+                    problem.open()
                     notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
                     db_session.add(notice)
                 if problem.is_open and not opened:
@@ -315,9 +320,13 @@ def show(_id):
             msg = result if result else msg
         else:
             current_user.last_auth_failed = datetime.now()
-            msg = "Wrong!"
+            msg = "Ddang"
 
     if not problem.is_open:
+        return redirect(url_for("frontend.prob"))
+
+    start = mktime(config.game_start.timetuple()) - time()
+    if start > 0 and not current_user.is_admin:
         return redirect(url_for("frontend.prob"))
 
     return render_template("show_prob.html", problem = problem, msg = msg)

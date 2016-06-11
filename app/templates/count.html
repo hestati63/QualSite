@@ -1,37 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<!DOCTYPE html>
-<html>
-	<head>
-		<title> GoN KAPO Qual </title>
-		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/materialize.css') }}">
-		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/qual.css') }}">
-		<link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.png') }}"/>
-		<script type="text/javascript" src="//code.jquery.com/jquery-1.7.1.min.js"></script>
-		<script src="{{ url_for('static', filename='js/materialize.js') }}"></script>
-	</head>
-<body class="black">
-	<main class="black">
-	<div class="Container">
-	      <img src="{{ url_for('static', filename='images/cat.png') }}" alt=';'></img>
-	</div>
-	<div style="display: table;margin-right: auto;margin-left: auto;">
-		<!-- START COUNTDOWN -->
-		<script src="{{url_for('static', filename='js/countdown.js')}}" type="text/javascript"></script>
-		<script type="application/javascript">
+{% extends "base.html" %}
+{% block body %}
+<div class="row center" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5> Game Begin In </h5>
+    <div style="display: table;margin-right: auto;margin-left: auto">
+      <!-- START COUNTDOWN -->
+      <script src="{{url_for('static', filename='js/countdown.js')}}" type="text/javascript"></script>
+      <script type="application/javascript">
 
-		var myCountdownTest = new Countdown({
-			rangeHi : "day",
-			time : {{left}},
-			width	: 600, 
-			height	: 100,
-			onComplete: function(){location.reload()}
-		});
-		</script>
-		<!-- END COUNTDOWN -->
-	</div>
-	</main>
-</body>
-</html>
+        var myCountdown = new Countdown({
+          rangeHi : "day",
+            time : {{ left }},
+            width	: 600, 
+            height	: 100,
+        });
+      </script>
+      <!-- END COUNTDOWN -->
+    </div>
+  </div>
+</div>
+<div class="row center" style="padding-top:24px">
+  <div class="col offset-s2 s8">
+    <h5><a href="{{ url_for('frontend.notice') }}">Notice</a></h5>
+    <table class="centered">
+      <tbody>
+        {% for notice in notices %}
+        <tr>
+          <td style="background-color:#fff">
+            <div class="col s1"> {{ notice.id }} </div>
+            <div class="col s8"><span class="center">{{ notice.body | safe }}</span></div>
+            <div class="col s3"> {{ (notice.upload | string)[:19]}}</div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+

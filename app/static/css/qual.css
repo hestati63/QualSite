@@ -1,3 +1,13 @@
+.chip
+{
+  display: inline-block;
+  vertical-align: middle;
+  color: #fff;
+}
+span.badge.new:after
+{
+  content: None;
+}
 .Container
 {
   text-align: center;
@@ -26,19 +36,6 @@
   font-weight: bold;
 }
 
-.tabs .tab a
-{
-  color: #81c784;
-}
-.tabs .indicator
-{
-  background-color: #e8f5e9;
-}
-nav 
-{
-  background-color: #81c784;
-}
-
 .btn
 {
   left:12px;
@@ -57,7 +54,7 @@ h3.valign:after { content: ""; display: block; clear: both; }
 
 .burning {
   color: #fff;
-  text-shadow: 0px -1px 4px white, 0px -2px 10px yellow, 0px -10px 20px #ff8000, 0px -18px 40px red;
+  text-shadow: 0px -1px 4px white, 0px -2px 10px yellow, 0px -10px 20px #ff8000;
 }
 
 .Container:before
@@ -109,8 +106,6 @@ blockquote {
 .collapsible-body {
   word-wrap: break-word;
 }
-
-
 
 .btn-icon {
   position: relative;

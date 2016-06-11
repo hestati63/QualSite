@@ -4,31 +4,37 @@
 <div class="row" style="padding-top:24px">
   <div class="col offset-s2 s8" style="padding-left:24px">
     <div class="col offset-s1 s11">
-    <span><h4 {% if problem.is_hot %} class="burning" {% endif %} style="display: inline-block"> {{ problem.name }} </h4> 
-      <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff">{{ problem.scores }}</div>
+      <span>
+        <h4 {% if problem.is_hot %} class="burning" {% endif %} style="display: inline-block"> {{ problem.name }} </h4> 
+        <div class="chip green lighten-2">{{ problem.scores }}</div>
+      </span>
     </div>
-  <hr></hr>
-  <div style="padding: 12px 24px 0 24px">
-    <div class="row">
-    <div class="col s2">
-      <b class="right">Category</b><br>
-      <b class="right">First Solver</b><br>
-      <b class="right">Solver</b><br>
-      <b class="right">Open at</b>
+
+    <hr />
+
+    <div style="padding: 12px 24px 0 24px">
+      <div class="row">
+        <div class="col s2">
+          <b class="right">Category</b><br>
+          <b class="right">First Solver</b><br>
+          <b class="right">Solver</b><br>
+          <b class="right">Open at</b>
+        </div>
+        <div class="col s8">
+          {{ problem.category }}<br>
+          {% if problem.fb %}<a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>{% endif %}<br>
+          {{ problem.solver }}<br>
+          {{ (problem.openat | string)[:19]}} 
+        </div>
+      </div>
     </div>
-    <div class="col s8">
-      {{ problem.category }}<br>
-      {% if problem.fb %}<a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>{% endif %}<br>
-      {{ problem.solver }}<br>
-      {{ (problem.openat | string)[:19]}} 
+
+    <hr />
+
+    <div style="padding: 24px 24px 24px 24px;">
+      {{ problem.description | safe}}
     </div>
-  </div>
-  </div>
-<hr></hr>
-<div style="padding: 24px 24px 24px 24px;">
-  {{ problem.description | safe}}
-</div>
-    <hr></hr>
+    <hr />
     <form class="col s12" method="post" style="display: inline-block; text-align: bottom;vertical-align: baseline;">
       <div class="row">
         <div class="col s2" style="padding-top: 16px;">
@@ -38,10 +44,10 @@
           <input placeholder="flag{flag_format_is_like_this}" name="flag" type="text" class="validate">
         </div>
         <div class="col s3" style="display: inline-block">
-        <button class="btn waves-effect waves-light" type="submit"  value="Submit" style="top: 20px;">Auth
-          <i class="material-icons right">send</i>
-        </button>
-      </div>
+          <button class="btn waves-effect waves-light" type="submit"  value="Submit" style="top: 20px;">Auth
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
       </div>
     </form>
 

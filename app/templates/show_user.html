@@ -3,18 +3,19 @@
 {% block body %}
 <div class="row" style="padding-top:24px">
   <div class="col offset-s2 s8" style="padding-left:24px">
+
     <div class="col offset-s1 s11">
       <span><h4 style="display: inline-block"> {{ user.userid }} </h4> 
-
-        {% if rank <= 3 %}
+        {% if rank >= 1 and rank <= 3 %}
         <div class="chip rank{{rank}}">Rank{{rank}}</div>
         {% else %}
-        <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> Rank: {{ rank }}</div>
+        <div class="chip green lighten-2"> Rank: {{ rank }}</div>
         {% endif %}
-
       </span>
     </div>
-    <hr></hr>
+
+    <hr />
+
     <div style="padding: 12px 24px 0 24px">
       <div class="row">
         <div class="col s2">
@@ -31,30 +32,33 @@
         </div>
       </div>
     </div>
-    <hr></hr>
+
+    <hr />
+
     <div class="row" style="padding: 12px 24px 12px 24px;">
+
       <div class="row">
-      <div class="col s2">
-        <h5 class="right"> <b>Solved</b> </h5>
+        <div class="col s2">
+          <h5 class="right"><b>Solved</b></h5>
+        </div>
       </div>
-      <div class="col s10"></div>
-    </div>
+
       <div class="row">
-      <div class="col offset-s1 s10">
-        {% for prob in user.solves %}
-        <a href="{{ url_for('frontend.show', _id = prob.id) }}"><b>[{{ prob.category }}]</b>{{ prob.name }}</a>
-        <div class="chip" style="display: inline-block; background-color: #81c784;color:#fff"> {{ prob.scores }}</div>
-        {% if prob.fb == user %}
-        <div class="chip" style="display: inline-block; background-color: #ef9a9a;color:#fff">First Solver</div>
-        {% endif %}
-        <br>
-        {% endfor %}
+        <div class="col offset-s1 s10">
+          {% for prob in user.solves %}
+          <a href="{{ url_for('frontend.show', _id = prob.id) }}"><b>[{{ prob.category }}]</b>{{ prob.name }}</a>
+          <div class="chip green lighten-2">{{ prob.scores }}</div>
+          {% if prob.fb == user %}
+          <div class="chip red lighten-2">First Solver</div>
+          {% endif %}
+          <br>
+          {% endfor %}
+        </div>
       </div>
+
     </div>
-    </div>
-    <hr></hr>
+    <hr />
   </div>
-</div>
 </div>
 
 {% endblock %}
