@@ -26,7 +26,7 @@
       {% if problem.open %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
         <span style="display: inline-flex;">
-            <span class="new badge {% if problem.hot %}red lighten-2{% endif %}">{{ problem.scores }}</span>
+            <span class="new badge {% if problem.hot %}red lighten-2{% endif %}">{{ problem.score }}</span>
             <span {% if problem.hot %} class="burning" {% endif %} style="padding-left:4px">{{ problem.name }}({{ problem.solver }})</span>
           </span>
         </a>

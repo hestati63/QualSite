@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-from flask import Flask, render_template, abort, request, url_for, redirect, Blueprint
+from flask import Flask, render_template, abort, request, url_for, redirect, Blueprint, send_from_directory
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import desc, asc
 from time import time, mktime
@@ -11,13 +11,17 @@ from . import loginmanager, db_session, app
 frontend = Blueprint('frontend', __name__)
 loginmanager.login_view = 'frontend.login'
 
+@app.route("/fonts/roboto/<path:path>")
+def getfont(path):
+    return send_from_directory("static/font/roboto", path)
+
 @app.errorhandler(404)
 def error404(err):
     return render_template("404.html"), 404
 
 @loginmanager.user_loader
 def load_user(userid):
-    return User.query.get(userid)
+    return User.query.get(userid) or abort(500)
 
 @frontend.route("/", methods=['GET', 'POST'])
 def main():
@@ -33,7 +37,7 @@ def main():
 @frontend.route("/rank")
 @login_required
 def rank():
-    return render_template('rank.html', users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).all())
+    return render_template('rank.html', users = User.query.filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).all())
 
 @frontend.route("/notice")
 def notice():
@@ -57,8 +61,8 @@ def prob():
     for i in problems:
         prs[i.category].append(i)
 
-    U15 = User.query.filter_by(_type = 0).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
-    U16 = User.query.filter_by(_type = 1).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U15 = User.query.filter_by(_type = 0).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U16 = User.query.filter_by(_type = 1).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
     return render_template("prob.html", pr = prs, categories = config.category, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), U15 = U15, U16 = U16)
 
 @frontend.route("/login", methods=["GET", "POST"])
@@ -81,48 +85,33 @@ def logout():
 
 @frontend.route("/signup", methods=["GET", "POST"])
 def signup():
+    form = registerForm(request.form)
     msg = None
-    try:
-        if request.method == "POST":
-            username = request.form['username']
-            pw = request.form['pw']
-            pwchk = request.form['pwchk']
-            name = request.form['name']
-            eyear = request.form['eyear']
-            if len(username) < 4:
-                msg = "username is too short!"
-            elif len(username) > 10:
-                msg = "username is too long!"
-            elif not eyear in ["0", "1"]:
-                msg = "no Troll"
-            elif not all(map(lambda x: x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_', username)):
-                msg = "Not allowed character in id"
-            elif len(pw) < 5:
-                msg = "password should be longer than 5 letters"
-            elif pw == pwchk:
-                if config.registkey == request.form['regkey'] or config.admin_registkey == request.form['regkey']:
-                    chk = User.query.filter_by(userid = username).first()
-                    if chk:
-                        msg = "user already exists"
-                    else:
-                        user = User(username, pw, name, eyear)
-                        if config.admin_registkey == request.form['regkey']:
-                            user.admin = True
-                            user._type = 2
-                        db_session.add(user)
-                        db_session.commit()
-                        map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())
-                        db_session.commit()
-                        map(lambda x: x.rebuild_score(), User.query.all())
-                        return redirect(url_for("frontend.login"))
-                else:
-                    msg = "wrong regist key"
-            else:
-                msg = "password and password check is differ"
-    except:
-        msg = "empty field"
 
-    return render_template("signup.html", msg = msg)
+    if request.method == "POST" and form.validate():
+        if not form.entrance_year.data in map(lambda x: x[0], config.entrance_type):
+            msg = "Entrance year - Invalid value"
+        elif not all(map(lambda x: x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_', form.username.data)):
+            msg = "Username - Invalid character"
+        else:
+            if config.registkey == form.registerkey.data or config.admin_registkey == form.registerkey.data:
+                chk = User.query.filter_by(userid = form.username.data).first()
+                if chk:
+                    msg = "Username - Duplicated username"
+                else:
+                    user = User(form.username.data, form.password.data, form.name.data, form.entrance_year.data)
+                    if config.admin_registkey == form.registerkey.data:
+                        user.admin = True
+                    db_session.add(user)
+                    db_session.commit()
+                    map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())
+                    db_session.commit()
+                    map(lambda x: x.rebuild_score(), User.query.all())
+                    return redirect(url_for("frontend.login"))
+            else:
+                msg = "Regist key - Invalid"
+
+    return render_template("signup.html", msg = msg, form = form)
 
 @frontend.route("/admin", methods=["POST", "GET"])
 @login_required
@@ -243,7 +232,7 @@ def admin():
             user = User.query.filter_by(id = target).first()
             return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
         else:
-            user = User.query.filter(User._type != 2).all()
+            user = User.query.filter(User.admin == True).all()
             return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
     elif cur == 'problem':
         if target:
@@ -258,29 +247,30 @@ def admin():
 @frontend.route("/mypage", methods=["POST", "GET"])
 @login_required
 def mypage():
+    form = MypageForm(request.form)
     msg = None
-    try:
-        if request.method == "POST":
-            cpw = request.form['cpw']
-            pw = request.form['pw']
-            pwchk = request.form['pwchk']
-            name = request.form['name']
-            if current_user.check_password(cpw):
-                if len(pw) < 5:
-                    msg = "password should be longer than 5 letters"
-                elif pw == pwchk:
-                    current_user.name = name
-                    current_user.set_password(pw)
-                    db_session.commit()
-                    msg = "data successfully update"
+    if request.method == "POST":
+        if current_user.check_password(form.cpassword.data):
+            msg = ""
+            if form.password.data:
+                if len(form.password.data) < 4:
+                    msg = "password - Field must be at least 4 characters long."
+                    return render_template("mypage.html", msg = msg, form = form, entrance_type = config.entrance_type)
+                elif form.password.data == form.confirm.data:
+                    msg += "password "
+                    current_user.set_password(form.password.data)
                 else:
-                    msg = "password and password check is differ"
-            else:
-                msg = "wrong current password"
-    except:
-        msg = "something wrong"
+                    msg = "Passwords must match"
+                    return render_template("mypage.html", msg = msg, form = form, entrance_type = config.entrance_type)
+            if form.name.data and form.name.data != current_user.name:
+                msg += "name "
+            if msg:
+                msg += "changed successfully"
+            db_session.commit()
+        else:
+            msg = "wrong current password"
 
-    return render_template("mypage.html", msg = msg)
+    return render_template("mypage.html", msg = msg, form = form, entrance_type = config.entrance_type)
 
 @frontend.route("/user/<int:_id>")
 @login_required
@@ -302,7 +292,7 @@ def show(_id):
             msg = problem.add_solver(current_user)
         else:
             current_user.last_auth_failed = datetime.now()
-            msg = "Ddang"
+            msg = "Ddang~"
 
     return render_template("show_prob.html", problem = problem, msg = msg)
 

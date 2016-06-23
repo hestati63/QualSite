@@ -4,40 +4,55 @@
   <div class="col offset-s2 s8">
     <h5 class="center"> Sign Up </h5>
     <form class="col offset-s3 s6" method="post">
+      {{ form.hidden_tag() }}
       <div class="row">
         <div class="input-field col s12">
-          <input name="username" type="text" class="validate">
+          {{ form.username(autofocus = True) }}
           <label for="first_name">Username</label>
         </div>
         <div class="input-field col s12">
-          <input name="pw" type="password" class="validate">
+          {{ form.password() }}
           <label for="last_name">Password</label>
         </div>
         <div class="input-field col s12">
-          <input name="pwchk" type="password" class="validate">
+          {{ form.confirm() }}
           <label for="last_name">Password Check</label>
         </div>
         <div class="input-field col s12">
-          <input name="name" type="text" class="validate">
+          {{ form.name() }}
           <label for="last_name">Name</label>
         </div>
         <div class="input-field col s12">
-          <input name="regkey" type="password" class="validate">
+          {{ form.registerkey() }}
           <label for="last_name">Register key</label>
         </div>
         <div class="col s12" style="padding-bottom: 24px">
           <label>GoN Entrance Year</label>
-          <select name="eyear" class="browser-default">
-            <option value="" disabled selected>Select</option>
-            <option value="0">~15</option>
-            <option value="1">16</option>
-          </select>
+          {{ form.entrance_year(class="browser-default") }}
         </div>
-          <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
-            <i class="material-icons right">send</i>
-          </button>
-        </div>
-      </form>
-    </div>
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+    </form>
   </div>
+</div>
 {% endblock %}
+
+{% block script %}
+{% macro error_field(field) %}
+{% if field.errors %}
+{% for error in field.errors %}
+Materialize.toast("{{ field.id }} - {{ error }}", 4000);
+{% endfor %}
+{% endif %}
+{% endmacro %}
+<script>
+  {{ error_field(form.username) }}
+  {{ error_field(form.name) }}
+  {{ error_field(form.password) }}
+  {{ error_field(form.confirm) }}
+  {{ error_field(form.registerkey) }}
+  {{ error_field(form.entrance_year) }}
+</script>
+{% endblock script %}

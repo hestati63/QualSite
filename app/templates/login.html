@@ -26,7 +26,7 @@
 {% macro error_field(field) %}
 {% if field.errors %}
 {% for error in field.errors %}
-Materialize.toast("{{ field.id }} - {{ error }}", 4000);
+materialize.toast("{{ field.id }} - {{ error }}", 4000);
 {% endfor %}
 {% endif %}
 {% endmacro %}

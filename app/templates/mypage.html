@@ -6,32 +6,33 @@
     <div class="row">
     <h5 class="center" style="font-size: 14px"><a href="{{ url_for('frontend.show_user', _id = current_user.id) }}"> Public Information</a></span>
      </div>
-    <form class="col offset-s3 s6" method="post">
+     <form class="col offset-s3 s6" method="post">
+       {{ form.hidden_tag() }}
       <div class="row">
         <div class="input-field col s12">
           <label for="first_name">Username</label>
           <input disabled name="username" type="text" class="validate" value="{{ current_user.userid }}">
         </div>
         <div class="input-field col s12">
-          <input name="cpw" type="password" class="validate">
+          {{ form.cpassword(autofocus=true) }}
           <label for="last_name">Current Password</label>
         </div>
 
         <div class="input-field col s12">
-          <input name="pw" type="password" class="validate">
+          {{ form.password() }}
           <label for="last_name">Password Change</label>
         </div>
         <div class="input-field col s12">
-          <input name="pwchk" type="password" class="validate">
+          {{ form.confirm() }}
           <label for="last_name">Password Check</label>
         </div>
         <div class="input-field col s12">
-          <input name="name" type="text" class="validate" value="{{ current_user.name }}">
+          {{ form.name(value = current_user.name) }}
           <label for="last_name">name</label>
         </div>
         <div class="input-field col s12">
           <label for="first_name">entrance year</label>
-          <input disabled name="username" type="text" class="validate" value="{% if current_user._type == '0' %} ~15 {% else %} 16 {% endif %}">
+          <input disabled name="username" type="text" class="validate" value="{{ entrance_type[current_user._type][1] }}">
         </div>
           <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
             <i class="material-icons right">send</i>
@@ -40,4 +41,19 @@
       </form>
     </div>
   </div>
-{% endblock %}
+  {% endblock %}
+{% block script %}
+{% macro error_field(field) %}
+{% if field.errors %}
+{% for error in field.errors %}
+materialize.toast("{{ field.id }} - {{ error }}", 4000);
+{% endfor %}
+{% endif %}
+{% endmacro %}
+<script>
+  {{ error_field(form.cpassword) }}
+  {{ error_field(form.password) }}
+  {{ error_field(form.confirm) }}
+  {{ error_field(form.name) }}
+</script>
+{% endblock script %}

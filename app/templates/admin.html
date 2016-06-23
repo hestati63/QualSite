@@ -126,7 +126,7 @@
             <tr>
               <td>{{ loop.index }}</td>
               <td><a href="?t=problem&target={{ problem.id }}">{{ problem.name }}</a></td>
-              <td>{{ problem.scores }}({{ problem.solver }})</td>
+              <td>{{ problem.score }}({{ problem.solver }})</td>
               <td>{{ problem.category }}</td>
               <td>{% if problem.hot %}<span class="red-text"> hot</span>|{% endif %}{% if problem.open %}<span class="blue-text">open</span> {% endif %}</td>
             </tr>

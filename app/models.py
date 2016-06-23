@@ -69,7 +69,7 @@ class User(Base):
     def rebuild_score(self):
         self.score = 0
         for problem in self.solves:
-            self.score += problem.scores
+            self.score += problem.score
         db_session.commit()
 
     def __repr__(self):
@@ -108,7 +108,7 @@ class Problem(Base):
     description = Column(String(512), unique = False)
     category = Column(String(512), unique = False)
     flag = Column(String(512), unique = False)
-    scores = Column(Integer, unique = False)
+    score = Column(Integer, unique = False)
 
     open = Column(Boolean, unique = False)
     openat = Column(DateTime, unique = False)
@@ -164,7 +164,7 @@ class Problem(Base):
             db_session.add(notice)
             msg = "U got Breakthrough!!! Plz open new problem!!!"
 
-        score_before = self.scores
+        score_before = self.score
 
         for solver in self.solvers:
             solver.score -= score_before
@@ -176,7 +176,7 @@ class Problem(Base):
         self.solver += 1
 
         score_now = update_score(self.solver)
-        self.scores = score_now
+        self.score = score_now
 
         for solver in self.solvers:
             solver.score += score_now
@@ -186,7 +186,7 @@ class Problem(Base):
         return msg
 
     def set_score(self, score):
-        self.scores = score
+        self.score = score
 
 def update_score(count):
     user_num = User.query.count()

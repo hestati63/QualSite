@@ -47,7 +47,7 @@
         <div class="col offset-s1 s10">
           {% for prob in user.solves %}
           <a href="{{ url_for('frontend.show', _id = prob.id) }}"><b>[{{ prob.category }}]</b>{{ prob.name }}</a>
-          <div class="chip green lighten-2">{{ prob.scores }}</div>
+          <div class="chip green lighten-2">{{ prob.score }}</div>
           {% if prob.fb == user %}
           <div class="chip red lighten-2">First Solver</div>
           {% endif %}
