@@ -11,7 +11,7 @@ from . import loginmanager, db_session, app
 frontend = Blueprint('frontend', __name__)
 loginmanager.login_view = 'frontend.login'
 
-@app.route("/fonts/roboto/<path:path>")
+@frontend.route("/fonts/roboto/<path:path>")
 def getfont(path):
     return send_from_directory("static/font/roboto", path)
 
@@ -32,12 +32,19 @@ def main():
     problems = Problem.query.filter_by(open = True).filter_by(hot = True).all()
 
     left = mktime(config.game_end.timetuple()) - time()
-    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User._type != 2).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
+    return render_template('main.html', pr = problems, left = left, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), users = User.query.filter(User.admin != True).order_by(desc(User.score), asc(User.last_auth_success)).limit(10).all())
 
-@frontend.route("/rank")
+@frontend.route("/rank/", defaults={'restrict': 'all'})
+@frontend.route("/rank/<string:restrict>")
 @login_required
-def rank():
-    return render_template('rank.html', users = User.query.filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).all())
+def rank(restrict):
+    users = None
+    if restrict != 'all':
+        users = User.query.filter_by(admin = False).filter_by(_type = int(restrict) - 13).order_by(desc(User.score), asc(User.last_auth_success)).all()
+    else:
+        users = User.query.filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).all()
+        
+    return render_template('rank.html', users = users, cur = restrict) 
 
 @frontend.route("/notice")
 def notice():
@@ -47,11 +54,26 @@ def notice():
 def rule():
     return render_template("rule.html", rules = Rule.query.all())
 
+@frontend.route("/prob_admin")
+@login_required
+def prob_admin():
+    if not current_user.admin: abort(404)
+    problems = Problem.query.all()
+    prs = {}
+    for key in config.category:
+        prs[key] = []
+
+    for i in problems:
+        prs[i.category].append(i)
+
+    return render_template("prob_admin.html", pr = prs, categories = config.category)
+
+
 @frontend.route("/prob")
 @login_required
 def prob():
     start = mktime(config.game_start.timetuple()) - time()
-    if start > 0 and not current_user.admin:
+    if start > 0 and not current_user.admin and False:
         return render_template("count.html", left = start, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all())
     problems = Problem.query.all()
     prs = {}
@@ -61,9 +83,11 @@ def prob():
     for i in problems:
         prs[i.category].append(i)
 
-    U15 = User.query.filter_by(_type = 0).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
-    U16 = User.query.filter_by(_type = 1).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
-    return render_template("prob.html", pr = prs, categories = config.category, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), U15 = U15, U16 = U16)
+    U13 = User.query.filter_by(_type = 0).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U14 = User.query.filter_by(_type = 1).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U15 = User.query.filter_by(_type = 2).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    U16 = User.query.filter_by(_type = 3).filter_by(admin = False).order_by(desc(User.score), asc(User.last_auth_success)).limit(5).all()
+    return render_template("prob.html", pr = prs, categories = config.category, notices = Notice.query.order_by(desc(Notice.id)).limit(5).all(), U13 = U13, U14 = U14, U15 = U15, U16 = U16)
 
 @frontend.route("/login", methods=["GET", "POST"])
 def login():
@@ -130,20 +154,35 @@ def admin():
 
     if request.method == "POST":
         if cur == 'notice':
-            notice = Notice(request.form["notice"])
-            db_session.add(notice)
-            db_session.commit()
-            msg = "notice added"
+            if target == '0':
+                notice = Notice(request.form["notice"])
+                db_session.add(notice)
+                db_session.commit()
+                msg = "notice added"
+            else:
+                notice = Notice.query.filter_by(id=target).first() or abort(404)
+                notice.body = request.form['notice']
+                db_session.add(notice)
+                db_session.commit()
+                msg = "notice changed"
         elif cur == 'rule':
-            rule = Rule(request.form["rule"])
-            db_session.add(rule)
-            db_session.commit()
-            msg = "rule added"
+            if target == '0':
+                rule = Rule(request.form["rule"])
+                db_session.add(rule)
+                db_session.commit()
+                msg = "rule added"
+            else:
+                rule = Rule.query.filter_by(id=target).first() or abort(404)
+                rule.body = request.form['rule']
+                db_session.add(rule)
+                db_session.commit()
+                msg = "rule changed"
         elif cur == 'user':
             pw = request.form['pw']
             pwchk = request.form['pwchk']
             name = request.form['name']
             eyear = request.form['eyear']
+            openable = request.form['open']
             user = User.query.get(target) or abort(404)
             
             if not eyear in ["0", "1"]:
@@ -159,6 +198,7 @@ def admin():
 
             if name:
                 user.name = name
+            user.openable = int(openable)
 
             db_session.commit()
             return redirect(url_for("frontend.admin", t="user"))
@@ -184,7 +224,7 @@ def admin():
                     db_session.add(problem)
                     db_session.commit()
                     if opened:
-                        problem.open()
+                        problem.openprob()
                     return redirect(url_for("frontend.admin", t="problem", msg="added"))
                 else:
                     return redirect(url_for("frontend.admin", t="problem", msg="failed"))
@@ -192,30 +232,16 @@ def admin():
                 problem = Problem.query.get(target) or abort(404)
 
             if name:
-                if name != problem.name and problem.open:
-                    notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> renamed to %s!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name, name))
-                    db_session.add(notice)
                 problem.name = name
             if desc:
-                if desc != problem.description and problem.open:
-                    notice = Notice("More information is provided to <a href=\"%s\"><b>[%s]</b>%s</a> !" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                    db_session.add(notice)
                 problem.description = desc
             if flag:
                 problem.flag = flag
             if cate and cate in config.category:
-                if cate != problem.category and problem.open:
-                    notice = Notice("<a href=\"%s\">%s</a> is moved to %s(before: %s)!" %(url_for('frontend.show', _id = problem.id), problem.name, cate, problem.category))
-                    db_session.add(notice)
                 problem.category = cate
             problem.hot = hot
             if not problem.open and opened:
-                problem.open()
-                notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                db_session.add(notice)
-            if problem.open and not opened:
-                notice = Notice("<a href=\"%s\"><b>[%s]</b>%s</a> closed!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name))
-                db_session.add(notice)
+                problem.openprob()
 
             problem.open = opened
 
@@ -225,14 +251,15 @@ def admin():
         else:
             cur = "notice"
 
-    if not cur in ['notic', 'rule', 'user', 'problem']:
+    if not cur in ['notice', 'rule', 'user', 'problem']:
         cur = "notice"
-    elif cur == 'user':
+    
+    if cur == 'user':
         if target:
             user = User.query.filter_by(id = target).first()
             return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
         else:
-            user = User.query.filter(User.admin == True).all()
+            user = User.query.filter(User.admin != True).all()
             return render_template("admin.html", msg = msg, cur = cur, users = user, target = target)
     elif cur == 'problem':
         if target:
@@ -240,7 +267,22 @@ def admin():
             return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target, categories = config.category)
         else:
             problem = Problem.query.all()
-            return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = target)
+            return render_template("admin.html", msg = msg, cur = cur, problems = problem, target = None)
+    elif cur == 'notice':
+        if target:
+            notice = Notice.query.filter_by(id = target).first()
+            return render_template("admin.html", msg = msg, cur = cur, notices = notice, target = target)
+        else:
+            notice = Notice.query.all()
+            return render_template("admin.html", msg = msg, cur = cur, notices = notice, target = target)
+    elif cur == 'rule':
+        if target:
+            rule = Rule.query.filter_by(id = target).first()
+            return render_template("admin.html", msg = msg, cur = cur, rules = rule, target = target)
+        else:
+            rule = Rule.query.all()
+            return render_template("admin.html", msg = msg, cur = cur, rules = rule, target = target)
+
 
     return render_template("admin.html", msg = msg, cur = cur)
 
@@ -281,17 +323,28 @@ def show_user(_id):
 @frontend.route("/show/<int:_id>", methods=["GET", "POST"])
 @login_required
 def show(_id):
-    start = mktime(config.game_start.timetuple()) - time()
+    cur = time()
+    start = mktime(config.game_start.timetuple()) - cur
     if start > 0 and not current_user.admin:
         return redirect(url_for("frontend.prob"))
 
     msg = None
-    problem = Problem.query.filter_by(open = True).filter_by(id = _id).first() or abort(404)
+    if current_user.admin:
+        problem = Problem.query.filter_by().filter_by(id = _id).first() or abort(404)
+    else:
+        problem = Problem.query.filter_by(open = True).filter_by(id = _id).first() or abort(404)
+
     if request.method == "POST" and 'flag' in request.form.keys():
-        if problem.check_flag(request.form['flag']):
+
+        wait = 60 - cur + mktime(current_user.last_auth_failed.timetuple()) if current_user.last_auth_failed else 0
+        if mktime(config.game_end.timetuple()) - cur <= 0:
+            msg = "Sorry. Game is Ended..."
+        elif wait > 0:
+            msg = "Wait %d Seconds.." % int(wait)
+        elif problem.check_flag(request.form['flag']):
             msg = problem.add_solver(current_user)
         else:
-            current_user.last_auth_failed = datetime.now()
+            current_user.last_auth_failed = datetime.datetime.now()
             msg = "Ddang~"
 
     return render_template("show_prob.html", problem = problem, msg = msg)
@@ -301,7 +354,7 @@ def show(_id):
 def open(_id):
     problem = Problem.query.filter_by(open = False).filter_by(id = _id).first() or abort(404)
 
-    if problem.open(current_user):
+    if problem.openprob(current_user):
         return redirect(url_for("frontend.prob"))
     else:
         abort(404)

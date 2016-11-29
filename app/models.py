@@ -1,7 +1,9 @@
 import datetime, math
 from sqlalchemy import Table, Column, Integer, String, Boolean, DateTime, ForeignKey, desc, asc
 from sqlalchemy.orm import relationship, backref
+from flask_login import login_required, login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import url_for
 from . import Base, db_session
 import config
 
@@ -128,15 +130,15 @@ class Problem(Base):
         self.hot = True
         self.set_score(update_score(0))
 
-    def open(self, user = None):
+    def openprob(self, user = None):
         info = ""
         if user:
             if user.openable <= 0:
                 return False
             user.openable -= 1
-            info = "<a href=\"%s\">%s</a> open <a href=\"%s\"><b>[%s]</b>%s</a>!" %(url_for('frontend.show_user', _id=current_user.id), current_user.userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name)
+            info = "[%s](%s) open [%s - %s](%s)" %(current_user.userid, url_for('frontend.show_user', _id = current_user.id), self.category, self.name, url_for('frontend.show', _id = self.id))
         else:
-            info = "<a href=\"%s\"><b>[%s]</b>%s</a> open!" %(url_for('frontend.show', _id = problem.id), problem.category, problem.name)
+             info = "[%s - %s](%s) open!" %(self.category, self.name, url_for('frontend.show', _id = self.id))
         self.open = True
         self.openat = datetime.datetime.now()
         db_session.add(Notice(info))
@@ -160,28 +162,22 @@ class Problem(Base):
 
         elif self.solver == 0:
             self.fb = user
-            notice = Notice("Wow! <a href=\"%s\">%s</a> <span class=\"red-text\">break</span> <a href=\"%s\"><b>[%s]</b>%s</a>!!!!" %(url_for('frontend.show_user', _id=current_user.id), current_user.userid, url_for('frontend.show', _id = problem.id), problem.category, problem.name))
+            notice = Notice("Wow! [%s](%s) solves [%s - %s](%s)!!!" %(current_user.userid, url_for('frontend.show_user', _id=current_user.id), self.category, self.name, url_for('frontend.show', _id = self.id)))
             db_session.add(notice)
             msg = "U got Breakthrough!!! Plz open new problem!!!"
-
-        score_before = self.score
-
-        for solver in self.solvers:
-            solver.score -= score_before
+        
         user.solves.append(self)
+        user.last_auth_success = datetime.datetime.now()
+        db_session.commit()
+        self.solver += 1
+        score_now = update_score(self.solver)
+        self.set_score(score_now)
+        map(lambda x: x.rebuild_score(), self.solvers)
 
-        if self.is_hot:
+        if self.hot:
             self.hot = False
             user.openable += 1
-        self.solver += 1
 
-        score_now = update_score(self.solver)
-        self.score = score_now
-
-        for solver in self.solvers:
-            solver.score += score_now
-        user.score += score_now
-        user.last_auth_success = datetime.datetime.now()
         db_session.commit()
         return msg
 
@@ -189,7 +185,7 @@ class Problem(Base):
         self.score = score
 
 def update_score(count):
-    user_num = User.query.count()
+    user_num = User.query.filter(User.admin != True).count()
     return int(config.score_max * math.log(1.1 * user_num / (count + 1)) / math.log(0.55 * user_num))
 
 

@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% block css %}
+tbody>tr{
+	height: 63px;
+}
+{% endblock %}
+
 {% block body %}
   <div class="row center" style="padding-top:24px">
     <div class="col offset-s2 s8">
-      <h5> Rank </h5>
-      <table class="centered highlight">
+      <h5> Rank <small style="grey-text">{% for tp in ['all', '13', '14', '15', '16'] %}<a href="{{url_for('frontend.rank', restrict=tp)}}"{% if cur==tp %} class="black-text"{% endif %}>{{ tp }}</a>{% endfor %}</small></h5>
+      <table class="centered highlight bordered">
         <thead>
           <tr>
             <th data-field="#"></th>
             <th data-field="rank">Rank</th>
             <th data-field="name">Name</th>
             <th data-field="score">Score</th>
+            <th data-field="lastauth">Solved</th>
             <th data-field="lastauth">authtime</th>
           </tr>
         </thead>
@@ -24,7 +31,8 @@
             <td>{{ loop.index }}</td>
             <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
             <td>{{ user.score }}</td>
-            <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
+            <td>{{ user.solves.count() }}</td>
+            <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[5:19] }}{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>

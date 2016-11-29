@@ -11,10 +11,26 @@
       </thead>
       <tbody>
         {% for rule in rules %}
-        <tr><td>{{ loop.index }}</td><td> {{ rule.body | safe}} </td></tr>
+        <tr><td>{{ loop.index }}</td><td><div class="rbd">{{ rule.body }}</div></td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 {% endblock %}
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
+
+<script>
+$.each($(".rbd"), function(idx){
+var content = $(this);
+content.html(marked($("<div/>").html(content.html()).text(), {
+gfm: true,
+tables: true,
+breaks: true,
+sanitize: true,
+smartLists: true
+}));});
+</script>
+{% endblock %}
+

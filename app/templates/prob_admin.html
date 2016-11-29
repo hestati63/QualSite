@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block css %}
+<style>
   .chip
   {
     height: 20px;
@@ -12,20 +13,21 @@
   {
     color: #fff;
   }
+</style>
 {% endblock css %}
 {% block body %}
 <div class="row" style="padding-top: 24px">
-  <div class="col offset-m2 m4 offset-s2 s10">
+  <div class="col offset-s2 s4">
     <h5> Problems </h5>
     {% for category in categories %}
     <span><b>{{ category }} </b></span><br>
     {% for problem in pr[category] %}
     <span class="valign">
-      {% if problem.open %}
+      {% if true %}
       <a href="{{url_for('frontend.show', _id = problem.id) }}">
         <span style="display: inline-flex;">
-            <span class="new badge {% if problem.hot %}red lighten-2 {% elif problem.solver == 0 %} amber darken-3 {% endif %}">{{ problem.score }}</span>
-            <span {% if problem.hot %} class="burning" {% endif %} style="padding-left:4px{% if current_user in problem.solvers %};text-decoration:line-through{% endif %}">{{ problem.name }}({{ problem.solver }})</span>
+            <span class="new badge {% if problem.hot %}red lighten-2{% endif %}">{{ problem.score }}</span>
+            <span {% if false %}class="burning" {% endif %} style="padding-left:4px">{{ problem.name }}({{ problem.solver }})</span>
           </span>
         </a>
         {% if current_user == problem.fb %}
@@ -35,6 +37,11 @@
         {% elif problem.fb %} 
         <div class="chip green lighten-2">
           <a href="{{ url_for('frontend.show_user', _id = problem.fb.id) }}">{{ problem.fb.userid }}</a>
+        </div>
+        {% endif %}
+        {% if current_user in problem.solvers %}
+        <div class="chip pink lighten-2">
+          solved
         </div>
         {% endif %}
     </span>
@@ -53,17 +60,17 @@
     <br>
     {% endfor %}
   </div>
-  <div class="col offset-s2 s10 m4">
+  <div class="col s4">
     <h5 class="center"> Notice </h5>
     <div class="row">
-    <table class="centered bordered">
+    <table class="centered">
       <tbody>
         {% for notice in notices %}
-        <tr>
-          <td style="background-color:#fff; " class="ntd">
+        <tr style="height:24px">
+          <td style="background-color:#fff; height:24px">
             <div class="col s1"> {{ notice.id }} </div>
-            <div class="col s8"><span class="center"><div class="nbd">{{ notice.body}}</div></span></div>
-            <div class="col s3"> {{ (notice.upload | string)[5:16]}}</div>
+            <div class="col s7"><span class="center">{{ notice.body | safe }}</span></div>
+            <div class="col s4"> {{ (notice.upload | string)[:19]}}</div>
           </td>
         </tr>
         {% endfor %}
@@ -75,10 +82,10 @@
     <div class="row">
       <div class="col s12">
         <ul class="tabs">
-          <li class="tab col s3"><a{% if current_user._type == 0 %} class="active"{% endif %} href="#13">13&#8593</a></li>
-          <li class="tab col s3"><a{% if current_user._type == 1 %} class="active"{% endif %} href="#14">14</a></li>
-          <li class="tab col s3"><a{% if current_user._type == 2 %} class="active"{% endif %} href="#15">15</a></li>
-          <li class="tab col s3"><a{% if current_user._type == 3 %} class="active"{% endif %} href="#16">16</a></li>
+          <li class="tab col s3"><a class="active"href="#13">13&#8593</a></li>
+          <li class="tab col s3"><a class="active"href="#14">14</a></li>
+          <li class="tab col s3"><a class="active"href="#15">15</a></li>
+          <li class="tab col s3"><a href="#16">16</a></li>
         </ul>
       </div>
       <div id="13" class="col s12">
@@ -89,6 +96,7 @@
               <th data-field="rank">Rank</th>
               <th data-field="name">Name</th>
               <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
             </tr>
           </thead>
           <tbody>
@@ -97,6 +105,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -111,6 +120,7 @@
               <th data-field="rank">Rank</th>
               <th data-field="name">Name</th>
               <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +129,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -133,6 +144,7 @@
               <th data-field="rank">Rank</th>
               <th data-field="name">Name</th>
               <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
             </tr>
           </thead>
           <tbody>
@@ -141,6 +153,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -155,6 +168,7 @@
               <th data-field="rank">Rank</th>
               <th data-field="name">Name</th>
               <th data-field="score">Score</th>
+              <th data-field="lastauth">authtime</th>
             </tr>
           </thead>
           <tbody>
@@ -163,6 +177,7 @@
               <td>{{ loop.index }}</td>
               <td><a href="{{ url_for('frontend.show_user', _id = user.id) }} ">{{ user.userid }}</a></td>
               <td>{{ user.score }}</td>
+              <td>{% if user.last_auth_success %}{{ (user.last_auth_success | string)[:19] }}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -174,19 +189,3 @@
 </div>
 
 {% endblock %}
-{% block script %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
-
-<script>
-$.each($(".nbd"), function(idx){
-var content = $(this);
-content.html(marked($("<div/>").html(content.html()).text(), {
-gfm: true,
-tables: true,
-breaks: true,
-sanitize: true,
-smartLists: true
-}));});
-</script>
-{% endblock %}
-

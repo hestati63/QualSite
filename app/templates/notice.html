@@ -3,14 +3,14 @@
 <div class="row center" style="padding-top:24px">
   <div class="col offset-s2 s8">
     <h5>Notice</h5>
-    <table class="centered">
+    <table class="centered bordered">
       <tbody>
         {% for notice in notices %}
         <tr>
-          <td style="background-color:#fff">
+          <td style="background-color:#fff;" class="ntd">
             <div class="col s1">{{ notice.id }} </div>
-            <div class="col s8"><span class="center">{{ notice.body | safe}}</span></div>
-            <div class="col s3"> {{ (notice.upload | string)[:19]}}</div>
+            <div class="col s8"><span class="center"><div class="nbd">{{ notice.body | safe}}</div></span></div>
+            <div class="col s3"> {{ (notice.upload | string)[5:16]}}</div>
           </td>
         </tr>
         {% endfor %}
@@ -19,4 +19,19 @@
   </div>
 </div>
   {% endblock %}
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"></script>
+
+<script>
+$.each($(".nbd"), function(idx){
+var content = $(this);
+content.html(marked($("<div/>").html(content.html()).text(), {
+gfm: true,
+tables: true,
+breaks: true,
+sanitize: true,
+smartLists: true
+}));});
+</script>
+{% endblock %}
 

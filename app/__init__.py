@@ -6,8 +6,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from flask_login import LoginManager
 import config
 
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__, static_url_path='/ctf')
 app.secret_key = config.SECRET
+app.config.update(
+SESSION_COOKIE_NAME = "ctf_session"
+)
 loginmanager = LoginManager(app)
 engine = create_engine(config.db, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -17,7 +20,7 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 from front import *
-app.register_blueprint(frontend, url_prefix='')
+app.register_blueprint(frontend, url_prefix='/ctf')
 
 def init_db():
     import models
@@ -43,5 +46,23 @@ def create_test_db():
 
     db_session.commit()
 
+def start():
+    notice = models.Notice("Game Start!")
+    db_session.add(notice)
+    db_session.commit()
+
+    prob = models.Problem.query.filter_by(id=1).first()
+    prob.open = True
+    db_session.add(prob)
+    db_session.commit()
+
+    notice = models.Notice("[%s - %s](%s) open!!!" % (prob.category, prob.name, 'http://gon.kaist.ac.kr/ctf/show/1'))
+    db_session.add(notice)
+    db_session.commit()
+
+def rebuild():
+    map(lambda x: x.set_score(update_score(x.solver)), Problem.query.all())
+    db_session.commit()
+    map(lambda x: x.rebuild_score(), User.query.all())  
 
 

@@ -27,3 +27,7 @@ if __name__ == "__main__":
         outfile = codecs.open(dst, 'w', encoding='utf-8')
         outfile.write(output)
         outfile.close()
+    elif argv[1] == "start":
+        start()
+    elif argv[1] == 'rebuild':
+        rebuild()
